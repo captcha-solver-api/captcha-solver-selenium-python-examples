@@ -1,3 +1,5 @@
+![Captcha Solver Selenium Python Examples](assets/selenium-python-examples-banner.png)
+
 # Captcha Solver Selenium Python Examples
 
 Runnable SeleniumBase examples for the official
