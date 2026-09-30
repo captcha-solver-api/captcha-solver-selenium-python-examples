@@ -13,6 +13,15 @@ URL = "https://2captcha.com/demo/clickcaptcha"
 IMAGE_SELECTOR = "img[alt='clickcaptcha example']"
 SUBMIT_LOCATOR = "//button[@type='submit']"
 
+CANVAS_SCRIPT = """
+const image = document.querySelector(arguments[0]);
+const canvas = document.createElement('canvas');
+canvas.width = image.naturalWidth;
+canvas.height = image.naturalHeight;
+canvas.getContext('2d').drawImage(image, 0, 0);
+return canvas.toDataURL('image/png').split(',', 2)[1];
+"""
+
 
 def png_size(png_base64: str):
     image = base64.b64decode(png_base64)
@@ -23,20 +32,30 @@ def main() -> None:
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         driver.get(URL)
         captcha = wait_for_css(driver, IMAGE_SELECTOR)
-        screenshot = captcha.screenshot_as_base64
-        image_width, image_height = png_size(screenshot)
-        solution = client.solve(CoordinatesTask(body=screenshot))
+        image = driver.execute_script(CANVAS_SCRIPT, IMAGE_SELECTOR)
+        image_width, image_height = png_size(image)
+        solution = client.solve(CoordinatesTask(body=image))
 
         scale_x = captcha.size["width"] / image_width
         scale_y = captcha.size["height"] / image_height
+        print(
+            "Image size:",
+            (image_width, image_height),
+            "displayed size:",
+            (captcha.size["width"], captcha.size["height"]),
+            "coordinates:",
+            solution["coordinates"],
+        )
         for point in solution["coordinates"]:
             ActionChains(driver).move_to_element_with_offset(
                 captcha,
-                point["x"] * scale_x,
-                point["y"] * scale_y,
+                point["x"] * scale_x - captcha.size["width"] / 2,
+                point["y"] * scale_y - captcha.size["height"] / 2,
             ).click().perform()
 
-        wait_for_xpath(driver, SUBMIT_LOCATOR).click()
+        submit = wait_for_xpath(driver, SUBMIT_LOCATOR)
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit)
+        driver.execute_script("arguments[0].click();", submit)
         show_success(driver)
         time.sleep(5)
 
