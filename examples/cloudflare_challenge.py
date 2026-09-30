@@ -1,0 +1,67 @@
+"""Intercept and solve Turnstile on a Cloudflare Challenge page."""
+
+import time
+
+from captcha_solver_api.tasks import TurnstileTaskProxyless
+from common import create_client, required_env
+from selenium.webdriver.support.ui import WebDriverWait
+from seleniumbase import Driver
+
+INTERCEPT_SCRIPT = """
+window.__turnstileParams = null;
+window.__turnstileCallback = null;
+const timer = setInterval(() => {
+  if (!window.turnstile) return;
+  clearInterval(timer);
+  window.turnstile.render = (_container, options) => {
+    window.__turnstileParams = {
+      websiteKey: options.sitekey,
+      websiteURL: window.location.href,
+      action: options.action,
+      data: options.cData,
+      pagedata: options.chlPageData,
+      userAgent: navigator.userAgent,
+    };
+    window.__turnstileCallback = options.callback;
+    return 'intercepted';
+  };
+}, 10);
+"""
+
+
+def main() -> None:
+    target_url = required_env("TARGET_URL")
+
+    with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+        driver.execute_cdp_cmd(
+            "Page.addScriptToEvaluateOnNewDocument",
+            {"source": INTERCEPT_SCRIPT},
+        )
+        driver.get(target_url)
+        WebDriverWait(driver, 30).until(
+            lambda current: current.execute_script("return !!window.__turnstileParams")
+        )
+        params = driver.execute_script("return window.__turnstileParams")
+        solution = client.solve(TurnstileTaskProxyless(**params))
+
+        returned_user_agent = solution.get("userAgent")
+        if returned_user_agent:
+            driver.execute_cdp_cmd(
+                "Network.setUserAgentOverride",
+                {"userAgent": returned_user_agent},
+            )
+
+        driver.execute_script(
+            """
+            if (typeof window.__turnstileCallback !== 'function') {
+              throw new Error('Turnstile callback was not captured');
+            }
+            window.__turnstileCallback(arguments[0]);
+            """,
+            solution["token"],
+        )
+        time.sleep(10)
+
+
+if __name__ == "__main__":
+    main()
