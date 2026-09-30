@@ -61,6 +61,9 @@ python examples/coordinates.py
 The browser remains visible so the full flow can be observed. Every script uses
 fresh values from the loaded page instead of storing challenge parameters.
 
+To run the Cloudflare Challenge example against another authorized page, set
+`TARGET_URL` in `.env` before launching `cloudflare_challenge_page.py`.
+
 ## Proxy examples
 
 The proxy used to load a captcha page must match the proxy sent in the API task.
