@@ -1,22 +1,9 @@
 # Captcha Solver Selenium Python Examples
 
-Practical browser automation examples using Python, SeleniumBase, and the official
-[`captcha-solver-api`](https://pypi.org/project/captcha-solver-api/) SDK.
-
-Each script is split into small steps that can be copied into an existing Selenium
-project: discover captcha parameters, create an API task, wait for the solution,
-and apply the result in the browser.
-
-## Included examples
-
-| Script | Scenario |
-|---|---|
-| `examples/recaptcha_v2.py` | Discover and solve a reCAPTCHA v2 widget |
-| `examples/recaptcha_v3.py` | Request and apply a score-based reCAPTCHA v3 token |
-| `examples/turnstile.py` | Solve a standalone Cloudflare Turnstile widget |
-| `examples/cloudflare_challenge.py` | Intercept the parameters and callback of a Cloudflare Challenge |
-| `examples/image_to_text.py` | Screenshot an image captcha and fill the recognized text |
-| `examples/coordinates.py` | Screenshot a click captcha and apply returned coordinates |
+Runnable SeleniumBase examples for the official
+[`captcha-solver-api`](https://pypi.org/project/captcha-solver-api/) Python SDK.
+The scripts open public captcha demo pages, extract the live parameters or image,
+send a task through the Captcha Solver API, and apply the answer in the browser.
 
 ## Installation
 
@@ -28,61 +15,75 @@ cd captcha-solver-selenium-python-examples
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
+cp .env.example .env
 ```
 
 On Windows, activate the environment with `.venv\Scripts\activate`.
 
-## Configuration
-
-Copy the example configuration and add your API key and target page details:
-
-```bash
-cp .env.example .env
-```
-
-At minimum, set:
+Set your API key in `.env`:
 
 ```dotenv
 CAPTCHA_API_KEY=your_api_key
-TARGET_URL=https://example.com/captcha
 ```
 
-The examples deliberately use configurable target URLs and selectors. Captcha
-markup differs between websites, so update `CAPTCHA_SELECTOR`, `ANSWER_SELECTOR`,
-and `SUBMIT_SELECTOR` in `.env` to match the page you are automating. reCAPTCHA v3
-also requires `WEBSITE_KEY`, `PAGE_ACTION`, and `MIN_SCORE`.
+Proxy examples also require `PROXY_TYPE`, `PROXY_ADDRESS`, `PROXY_PORT`, and,
+when necessary, `PROXY_LOGIN` and `PROXY_PASSWORD`.
 
-## Running an example
+## Examples
+
+| Script | Browser flow |
+|---|---|
+| `recaptcha_v2.py` | Extract the sitekey, solve reCAPTCHA v2, fill the response field, and submit |
+| `recaptcha_v2_proxy.py` | Use the same proxy for Selenium and the API task |
+| `recaptcha_v2_callback_variant1.py` | Invoke the callback whose name is known by the demo |
+| `recaptcha_v2_callback_variant2.py` | Discover the callback automatically in reCAPTCHA internals |
+| `recaptcha_v2_callback_proxy.py` | Solve the callback flow through a matching proxy |
+| `recaptcha_v3.py` | Extract `sitekey` and `action` from page scripts and apply the token |
+| `recaptcha_v3_extended_js_script.py` | Entry point for the script-inspection v3 flow |
+| `cloudflare_turnstile.py` | Solve a standalone Turnstile widget and submit the form |
+| `cloudflare_challenge_page.py` | Intercept `turnstile.render`, solve the challenge, and invoke its callback |
+| `normal_captcha_screenshot.py` | Screenshot the captcha element and enter the recognized text |
+| `normal_captcha_canvas.py` | Extract the image through canvas and enter the recognized text |
+| `normal_captcha_screenshot_params.py` | Add numeric and length hints to image recognition |
+| `coordinates.py` | Extract a click-captcha image and click the returned coordinates |
+
+Run any example from the repository root:
 
 ```bash
 python examples/recaptcha_v2.py
-python examples/turnstile.py
-python examples/cloudflare_challenge.py
-python examples/image_to_text.py
+python examples/recaptcha_v2_callback_variant2.py
+python examples/cloudflare_turnstile.py
+python examples/cloudflare_challenge_page.py
+python examples/normal_captcha_canvas.py
 python examples/coordinates.py
 ```
 
-The browser is visible by default so you can inspect every step. Change
-`headless=False` in a script after confirming that the flow works for your page.
+The browser remains visible so the full flow can be observed. Every script uses
+fresh values from the loaded page instead of storing challenge parameters.
 
-## Adapting the examples
+## Proxy examples
 
-Token captchas are bound to details of the page and browser session. Use fresh
-parameters from the current page, submit the token before it expires, and keep
-the browser proxy consistent with the proxy supplied to a proxied API task.
+The proxy used to load a captcha page must match the proxy sent in the API task.
+Configure it in `.env`, then run:
 
-Cloudflare Challenge requires interception before `turnstile.render()` runs.
-The challenge example installs its interception script before navigation,
-captures `action`, `cData`, `chlPageData`, callback, and browser User-Agent, then
-applies the returned token through the captured callback.
+```bash
+python examples/recaptcha_v2_proxy.py
+python examples/recaptcha_v2_callback_proxy.py
+```
 
-Use these examples only on websites you own or are authorized to automate.
+## Unsupported comparison scenarios
+
+The SDK currently has no MTCaptcha or text-question task, and reCAPTCHA v3 is
+proxyless. Those examples are intentionally omitted rather than sending an
+unsupported task shape to the API.
 
 ## Documentation
 
 - [Captcha Solver API documentation](https://captcha-solver.com/en/docs/captcha-types)
 - [Python SDK](https://github.com/captcha-solver-api/python-sdk)
 
+Use these examples only on websites you own or are authorized to automate.
+
 ## License
 
-MIT. See [LICENSE.md](LICENSE.md).
+MIT. See [LICENSE.md](LICENSE.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

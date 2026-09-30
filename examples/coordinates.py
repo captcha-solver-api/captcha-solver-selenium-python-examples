@@ -1,14 +1,17 @@
 """Solve a coordinate captcha and click the returned image positions."""
 
 import base64
-import os
 import struct
 import time
 
 from captcha_solver_api.tasks import CoordinatesTask
-from common import click_optional, create_client, required_env, wait_for_css
+from common import create_client, show_success, wait_for_css, wait_for_xpath
 from selenium.webdriver import ActionChains
 from seleniumbase import Driver
+
+URL = "https://2captcha.com/demo/clickcaptcha"
+IMAGE_SELECTOR = "img[alt='clickcaptcha example']"
+SUBMIT_LOCATOR = "//button[@type='submit']"
 
 
 def png_size(png_base64: str):
@@ -17,16 +20,12 @@ def png_size(png_base64: str):
 
 
 def main() -> None:
-    target_url = required_env("TARGET_URL")
-    captcha_selector = os.getenv("CAPTCHA_SELECTOR", "img.captcha")
-    instruction = required_env("CAPTCHA_INSTRUCTION")
-
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
-        driver.get(target_url)
-        captcha = wait_for_css(driver, captcha_selector)
+        driver.get(URL)
+        captcha = wait_for_css(driver, IMAGE_SELECTOR)
         screenshot = captcha.screenshot_as_base64
         image_width, image_height = png_size(screenshot)
-        solution = client.solve(CoordinatesTask(body=screenshot, comment=instruction))
+        solution = client.solve(CoordinatesTask(body=screenshot))
 
         scale_x = captcha.size["width"] / image_width
         scale_y = captcha.size["height"] / image_height
@@ -37,7 +36,8 @@ def main() -> None:
                 point["y"] * scale_y,
             ).click().perform()
 
-        click_optional(driver, os.getenv("SUBMIT_SELECTOR"))
+        wait_for_xpath(driver, SUBMIT_LOCATOR).click()
+        show_success(driver)
         time.sleep(5)
 
 

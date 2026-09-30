@@ -1,4 +1,4 @@
-"""Screenshot an image captcha, solve it, and fill its answer field."""
+"""Solve the demo image captcha with additional recognition hints."""
 
 import time
 
@@ -15,8 +15,15 @@ SUBMIT_LOCATOR = "//button[@type='submit']"
 def main() -> None:
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         driver.get(URL)
-        captcha = wait_for_xpath(driver, IMAGE_LOCATOR)
-        solution = client.solve(ImageToTextTask(body=captcha.screenshot_as_base64))
+        image = wait_for_xpath(driver, IMAGE_LOCATOR).screenshot_as_base64
+        solution = client.solve(
+            ImageToTextTask(
+                body=image,
+                numeric=4,
+                minLength=4,
+                maxLength=10,
+            )
+        )
         wait_for_xpath(driver, ANSWER_LOCATOR).send_keys(solution["text"])
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         show_success(driver)

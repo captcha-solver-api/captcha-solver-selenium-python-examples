@@ -3,9 +3,11 @@
 import time
 
 from captcha_solver_api.tasks import TurnstileTaskProxyless
-from common import create_client, required_env
+from common import create_client, show_success
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
+
+URL = "https://2captcha.com/demo/cloudflare-turnstile-challenge"
 
 INTERCEPT_SCRIPT = """
 window.__turnstileParams = null;
@@ -30,14 +32,12 @@ const timer = setInterval(() => {
 
 
 def main() -> None:
-    target_url = required_env("TARGET_URL")
-
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {"source": INTERCEPT_SCRIPT},
         )
-        driver.get(target_url)
+        driver.get(URL)
         WebDriverWait(driver, 30).until(
             lambda current: current.execute_script("return !!window.__turnstileParams")
         )
@@ -60,6 +60,7 @@ def main() -> None:
             """,
             solution["token"],
         )
+        show_success(driver)
         time.sleep(10)
 
 

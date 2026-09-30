@@ -1,35 +1,28 @@
 """Solve a standalone Cloudflare Turnstile widget."""
 
-import os
 import time
 
 from captcha_solver_api.tasks import TurnstileTaskProxyless
-from common import (
-    click_optional,
-    create_client,
-    fill_response_field,
-    required_env,
-    wait_for_css,
-)
+from common import create_client, fill_response_field, show_success, wait_for_xpath
 from seleniumbase import Driver
+
+URL = "https://2captcha.com/demo/cloudflare-turnstile"
+SITEKEY_LOCATOR = "//div[@id='cf-turnstile']"
+SUBMIT_LOCATOR = "//button[@type='submit']"
 
 
 def main() -> None:
-    target_url = required_env("TARGET_URL")
-    captcha_selector = os.getenv("CAPTCHA_SELECTOR", ".cf-turnstile[data-sitekey]")
-
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
-        driver.get(target_url)
-        widget = wait_for_css(driver, captcha_selector)
+        driver.get(URL)
+        widget = wait_for_xpath(driver, SITEKEY_LOCATOR)
         sitekey = widget.get_attribute("data-sitekey")
         if not sitekey:
-            raise RuntimeError(f"No data-sitekey found on {captcha_selector}")
+            raise RuntimeError("No Turnstile sitekey found")
 
-        solution = client.solve(
-            TurnstileTaskProxyless(websiteURL=driver.current_url, websiteKey=sitekey)
-        )
+        solution = client.solve(TurnstileTaskProxyless(websiteURL=URL, websiteKey=sitekey))
         fill_response_field(driver, "cf-turnstile-response", solution["token"])
-        click_optional(driver, os.getenv("SUBMIT_SELECTOR"))
+        wait_for_xpath(driver, SUBMIT_LOCATOR).click()
+        show_success(driver)
         time.sleep(5)
 
 
