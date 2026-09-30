@@ -32,31 +32,36 @@ const timer = setInterval(() => {
 """
 
 
+def capture_params(driver):
+    try:
+        WebDriverWait(driver, 30).until(
+            lambda current: current.execute_script("return !!window.__turnstileParams")
+        )
+    except TimeoutException as exc:
+        page_text = driver.execute_script("return document.body.innerText.slice(0, 500)")
+        raise RuntimeError(
+            "Turnstile parameters were not captured. The demo may have blocked "
+            f"the browser before rendering the challenge. Page text: {page_text!r}"
+        ) from exc
+    return driver.execute_script("return window.__turnstileParams")
+
+
 def main() -> None:
-    with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+    with Driver(browser="chrome", headless=False, uc=True) as driver, create_client() as client:
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {"source": INTERCEPT_SCRIPT},
         )
         driver.get(URL)
-        try:
-            WebDriverWait(driver, 30).until(
-                lambda current: current.execute_script("return !!window.__turnstileParams")
-            )
-        except TimeoutException as exc:
-            page_text = driver.execute_script("return document.body.innerText.slice(0, 500)")
-            raise RuntimeError(
-                "Turnstile parameters were not captured. The demo may have blocked "
-                f"the browser before rendering the challenge. Page text: {page_text!r}"
-            ) from exc
-        params = driver.execute_script("return window.__turnstileParams")
+        params = capture_params(driver)
         solution = client.solve(TurnstileTaskProxyless(**params))
 
         returned_user_agent = solution.get("userAgent")
-        if returned_user_agent:
-            driver.execute_cdp_cmd(
-                "Network.setUserAgentOverride",
-                {"userAgent": returned_user_agent},
+        if returned_user_agent and returned_user_agent != params.get("userAgent"):
+            raise RuntimeError(
+                "The API returned a User-Agent different from the browser session: "
+                f"browser={params.get('userAgent')!r}, returned={returned_user_agent!r}. "
+                "The token cannot be applied to this already-loaded challenge."
             )
 
         driver.execute_script(

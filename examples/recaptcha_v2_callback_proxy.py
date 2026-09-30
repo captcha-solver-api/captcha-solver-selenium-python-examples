@@ -10,6 +10,7 @@ from common import (
     show_success,
     wait_for_xpath,
 )
+from selenium.common.exceptions import TimeoutException
 from seleniumbase import Driver
 
 URL = "https://2captcha.com/demo/recaptcha-v2-callback"
@@ -22,7 +23,13 @@ def main() -> None:
         create_client() as client,
     ):
         driver.get(URL)
-        sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
+        try:
+            sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
+        except TimeoutException as exc:
+            raise RuntimeError(
+                "The target page did not load through the configured proxy. "
+                "Check the proxy address, credentials, and availability."
+            ) from exc
         solution = client.solve(
             RecaptchaV2Task(
                 websiteURL=URL,
