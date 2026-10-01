@@ -4,12 +4,16 @@ import os
 import time
 
 from captcha_solver_api.tasks import TurnstileTaskProxyless
-from common import create_client, show_success
+from common import create_client, required_env, show_success
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-URL = os.getenv("TARGET_URL") or "https://2captcha.com/demo/cloudflare-turnstile-challenge"
+URL = required_env("TARGET_URL")
+BROWSER_USER_AGENT = os.getenv("BROWSER_USER_AGENT") or (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
 
 INTERCEPT_SCRIPT = """
 window.__turnstileParams = null;
@@ -17,7 +21,8 @@ window.__turnstileCallback = null;
 const timer = setInterval(() => {
   if (!window.turnstile) return;
   clearInterval(timer);
-  window.turnstile.render = (_container, options) => {
+  const originalRender = window.turnstile.render;
+  window.turnstile.render = (container, options) => {
     window.__turnstileParams = {
       websiteKey: options.sitekey,
       websiteURL: window.location.href,
@@ -27,7 +32,7 @@ const timer = setInterval(() => {
       userAgent: navigator.userAgent,
     };
     window.__turnstileCallback = options.callback;
-    return undefined;
+    return originalRender ? originalRender(container, options) : undefined;
   };
 }, 10);
 """
@@ -61,24 +66,17 @@ def capture_params(driver):
     return state["params"]
 
 
-def normalized_user_agent() -> str:
-    """Read Chrome's UA before launching the challenge browser."""
-    with Driver(browser="chrome", headless=True) as driver:
-        user_agent = driver.execute_script("return navigator.userAgent")
-    return user_agent.replace("Headless", "").replace("Chromium", "Chrome")
-
-
 def main() -> None:
-    user_agent = normalized_user_agent()
     with (
-        Driver(browser="chrome", headless=False, uc=True, agent=user_agent) as driver,
+        Driver(browser="chrome", headless=False, agent=BROWSER_USER_AGENT) as driver,
         create_client() as client,
     ):
+        driver.get(URL)
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {"source": INTERCEPT_SCRIPT},
         )
-        driver.get(URL)
+        driver.refresh()
         params = capture_params(driver)
         if params is None:
             return
