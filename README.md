@@ -74,6 +74,11 @@ CAPTCHA_API_KEY=your_api_key
 TARGET_URL=https://your-site.example/captcha-page
 ```
 
+> Before running an example, replace `TARGET_URL` with the target page for your
+> own authorized test. Do not leave the placeholder value. Each example expects
+> the page to contain the corresponding captcha type and may require its
+> selectors or callback names to be adjusted for that page.
+
 Run an example from the repository root:
 
 ```bash
