@@ -19,7 +19,7 @@ SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
 
 def main() -> None:
     with (
-        Driver(browser="chrome", headless=False, proxy=selenium_proxy()) as driver,
+        Driver(browser="chrome", headless=False, cft=True, proxy=selenium_proxy()) as driver,
         create_client() as client,
     ):
         driver.get(URL)

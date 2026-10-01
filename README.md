@@ -28,7 +28,8 @@ handle elements, waits, scripts, and mouse actions.
 ## Requirements
 
 - Python 3.9 or newer
-- Google Chrome
+- Google Chrome; proxy examples automatically use Chrome for Testing so that
+  authenticated proxy configuration works on current Chrome versions
 - A Captcha Solver API key with sufficient balance
 - A working proxy for examples whose filename ends in `_proxy.py`
 
@@ -232,6 +233,10 @@ python examples/recaptcha_v2_callback_proxy.py
 If the target page cannot be loaded, the examples stop before creating an API
 task and report that the proxy address, credentials, or availability should be
 checked.
+
+The first proxy run may take longer because SeleniumBase downloads the matching
+Chrome for Testing build. This build is required for automatic loading of the
+proxy-authentication extension on current Chrome versions.
 
 ## How the examples work
 
