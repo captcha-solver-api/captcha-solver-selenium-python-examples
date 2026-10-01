@@ -1,18 +1,18 @@
 """Solve reCAPTCHA v2 in a SeleniumBase browser session."""
 
+import os
 import time
 
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
 from common import (
     create_client,
     fill_response_field,
-    required_env,
     wait_for_css,
     wait_for_xpath,
 )
 from seleniumbase import Driver
 
-URL = required_env("TARGET_URL")
+URL = os.getenv("TARGET_URL") or "https://www.google.com/recaptcha/api2/demo"
 SITEKEY_LOCATOR = "//*[@data-sitekey]"
 SUBMIT_LOCATOR = "//*[@type='submit']"
 SUCCESS_SELECTOR = ".recaptcha-success, p.successMessage"
