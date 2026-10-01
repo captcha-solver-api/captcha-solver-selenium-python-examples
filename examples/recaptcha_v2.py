@@ -3,12 +3,19 @@
 import time
 
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
-from common import create_client, fill_response_field, required_env, show_success, wait_for_xpath
+from common import (
+    create_client,
+    fill_response_field,
+    required_env,
+    wait_for_css,
+    wait_for_xpath,
+)
 from seleniumbase import Driver
 
 URL = required_env("TARGET_URL")
-SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
-SUBMIT_LOCATOR = "//button[@data-action='demo_action']"
+SITEKEY_LOCATOR = "//*[@data-sitekey]"
+SUBMIT_LOCATOR = "//*[@type='submit']"
+SUCCESS_SELECTOR = ".recaptcha-success, p.successMessage"
 
 
 def main() -> None:
@@ -28,7 +35,7 @@ def main() -> None:
         )
         fill_response_field(driver, "g-recaptcha-response", solution["gRecaptchaResponse"])
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
-        show_success(driver)
+        print(wait_for_css(driver, SUCCESS_SELECTOR).text)
         time.sleep(5)
 
 
