@@ -97,6 +97,12 @@ python examples/recaptcha_v2.py
 Chrome stays visible so you can observe parameter extraction, solution delivery,
 and submission on the page.
 
+After the API returns a solution, every example prints the complete solution as
+formatted JSON, including the token or recognized answer and any additional
+response fields. The page's success message is printed after the solution has
+been applied, so the console records both the API response and page verification.
+The API key is never printed.
+
 ## Available examples
 
 | Captcha type | Example | What it demonstrates |
