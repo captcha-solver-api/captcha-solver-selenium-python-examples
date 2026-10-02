@@ -5,7 +5,14 @@ import struct
 import time
 
 from captcha_solver_api.tasks import CoordinatesTask
-from common import create_client, required_env, show_success, wait_for_css, wait_for_xpath
+from common import (
+    create_client,
+    logged_example,
+    required_env,
+    show_success,
+    wait_for_css,
+    wait_for_xpath,
+)
 from selenium.webdriver import ActionChains
 from seleniumbase import Driver
 
@@ -28,6 +35,7 @@ def png_size(png_base64: str):
     return struct.unpack(">II", image[16:24])
 
 
+@logged_example
 def main() -> None:
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         driver.get(URL)
@@ -46,16 +54,19 @@ def main() -> None:
             "coordinates:",
             solution["coordinates"],
         )
+        print("The received response is converted into a list of coordinates")
         for point in solution["coordinates"]:
             ActionChains(driver).move_to_element_with_offset(
                 captcha,
                 point["x"] * scale_x - captcha.size["width"] / 2,
                 point["y"] * scale_y - captcha.size["height"] / 2,
             ).click().perform()
+        print("The coordinates are marked on the image")
 
         submit = wait_for_xpath(driver, SUBMIT_LOCATOR)
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit)
         driver.execute_script("arguments[0].click();", submit)
+        print("Pressed the Check button")
         show_success(driver)
         time.sleep(5)
 

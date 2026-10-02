@@ -3,7 +3,14 @@
 import time
 
 from captcha_solver_api.tasks import ImageToTextTask
-from common import create_client, required_env, show_success, wait_for_css, wait_for_xpath
+from common import (
+    create_client,
+    logged_example,
+    required_env,
+    show_success,
+    wait_for_css,
+    wait_for_xpath,
+)
 from seleniumbase import Driver
 
 URL = required_env("TARGET_URL")
@@ -21,6 +28,7 @@ return canvas.toDataURL('image/png').split(',', 2)[1];
 """
 
 
+@logged_example
 def main() -> None:
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         driver.get(URL)
@@ -28,7 +36,9 @@ def main() -> None:
         image = driver.execute_script(CANVAS_SCRIPT, IMAGE_SELECTOR)
         solution = client.solve(ImageToTextTask(body=image))
         wait_for_xpath(driver, ANSWER_LOCATOR).send_keys(solution["text"])
+        print("Entered the answer to the captcha")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
+        print("Pressed the Check button")
         show_success(driver)
         time.sleep(5)
 

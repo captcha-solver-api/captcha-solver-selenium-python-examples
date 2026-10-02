@@ -5,6 +5,7 @@ import time
 from captcha_solver_api.tasks import RecaptchaV2Task
 from common import (
     create_client,
+    logged_example,
     proxy_settings,
     required_env,
     selenium_proxy,
@@ -18,6 +19,7 @@ URL = required_env("TARGET_URL")
 SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
 
 
+@logged_example
 def main() -> None:
     with (
         Driver(browser="chrome", headless=False, cft=True, proxy=selenium_proxy()) as driver,
@@ -31,6 +33,7 @@ def main() -> None:
                 "The target page did not load through the configured proxy. "
                 "Check the proxy address, credentials, and availability."
             ) from exc
+        print("Got the callback function name and site key")
         solution = client.solve(
             RecaptchaV2Task(
                 websiteURL=URL,
@@ -43,6 +46,7 @@ def main() -> None:
             "window.verifyDemoRecaptcha(arguments[0]);",
             solution["gRecaptchaResponse"],
         )
+        print("The token is sent to the callback function")
         show_success(driver)
         time.sleep(5)
 
