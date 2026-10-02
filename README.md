@@ -23,6 +23,7 @@ handle elements, waits, scripts, and mouse actions.
 - [Proxy configuration](#proxy-configuration)
 - [How the examples work](#how-the-examples-work)
 - [Troubleshooting](#troubleshooting)
+- [Useful links](#useful-links)
 - [Documentation](#documentation)
 
 ## Requirements
@@ -315,12 +316,19 @@ ruff check .
 ruff format --check .
 ```
 
+## Useful links
+
+- [Python SDK](https://github.com/captcha-solver-api/python-sdk)
+- [JavaScript SDK](https://github.com/captcha-solver-api/javascript-sdk)
+- [Python examples](https://github.com/captcha-solver-api/python-examples)
+- [JavaScript examples](https://github.com/captcha-solver-api/javascript-examples)
+- [Cloudflare Turnstile Puppeteer demo](https://github.com/captcha-solver-api/cloudflare-turnstile-puppeteer-demo)
+- [Tencent CAPTCHA automation examples](https://github.com/captcha-solver-api/How-to-Automate-Tencent-CAPTCHA)
+
 ## Documentation
 
 - [Captcha Solver API documentation](https://captcha-solver.com/en/docs/captcha-types)
-- [Python SDK](https://github.com/captcha-solver-api/python-sdk)
 - [Python package on PyPI](https://pypi.org/project/captcha-solver-api/)
-- [Cloudflare Turnstile Puppeteer demo](https://github.com/captcha-solver-api/cloudflare-turnstile-puppeteer-demo)
 
 Use these examples only on websites you own or are authorized to automate.
 
