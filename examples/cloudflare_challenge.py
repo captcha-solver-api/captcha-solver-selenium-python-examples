@@ -4,7 +4,7 @@ import os
 import time
 
 from captcha_solver_api.tasks import TurnstileTaskProxyless
-from common import create_client, required_env, show_success
+from common import create_client, logged_example, required_env, show_success
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
@@ -66,6 +66,7 @@ def capture_params(driver):
     return state["params"]
 
 
+@logged_example
 def main() -> None:
     with (
         Driver(browser="chrome", headless=False, agent=BROWSER_USER_AGENT) as driver,
@@ -80,6 +81,7 @@ def main() -> None:
         params = capture_params(driver)
         if params is None:
             return
+        print("Parameters received")
         solution = client.solve(TurnstileTaskProxyless(**params))
 
         driver.execute_script(
@@ -91,6 +93,7 @@ def main() -> None:
             """,
             solution["token"],
         )
+        print("The token is sent to the callback function")
         show_success(driver)
         time.sleep(10)
 

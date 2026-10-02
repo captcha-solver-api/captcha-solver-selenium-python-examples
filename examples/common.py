@@ -2,6 +2,7 @@
 
 import json
 import os
+from functools import wraps
 from typing import Any, Dict, Optional
 
 from captcha_solver_api import CaptchaClient
@@ -23,9 +24,33 @@ class ConsoleCaptchaClient(CaptchaClient):
         timeout: Optional[int] = None,
     ) -> Dict[str, Any]:
         solution = super().solve(task, language_pool=language_pool, timeout=timeout)
+        if "text" in solution:
+            print(f"Captcha solved. Code: {solution['text']}")
+        elif "coordinates" in solution:
+            print("Captcha solved. Coordinates received")
+        else:
+            print("Captcha solved")
         print("API response:")
         print(json.dumps(solution, ensure_ascii=False, indent=2, sort_keys=True))
         return solution
+
+
+def logged_example(function):
+    """Print the same lifecycle messages as the reference Selenium examples."""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        print("Started")
+        try:
+            result = function(*args, **kwargs)
+        except Exception as error:
+            print(f"An error occurred: {error}")
+            print("Failed to solve captcha")
+            raise
+        print("Finished")
+        return result
+
+    return wrapper
 
 
 def required_env(name: str) -> str:
