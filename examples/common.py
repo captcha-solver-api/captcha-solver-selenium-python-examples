@@ -1,7 +1,8 @@
 """Shared helpers for the Selenium examples."""
 
+import json
 import os
-from typing import Dict
+from typing import Any, Dict, Optional
 
 from captcha_solver_api import CaptchaClient
 from dotenv import load_dotenv
@@ -12,6 +13,21 @@ from selenium.webdriver.support.ui import WebDriverWait
 load_dotenv()
 
 
+class ConsoleCaptchaClient(CaptchaClient):
+    """Captcha client that prints the complete solution returned by the API."""
+
+    def solve(
+        self,
+        task: Any,
+        language_pool: Optional[str] = None,
+        timeout: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        solution = super().solve(task, language_pool=language_pool, timeout=timeout)
+        print("API response:")
+        print(json.dumps(solution, ensure_ascii=False, indent=2, sort_keys=True))
+        return solution
+
+
 def required_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
@@ -20,7 +36,7 @@ def required_env(name: str) -> str:
 
 
 def create_client() -> CaptchaClient:
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return ConsoleCaptchaClient(required_env("CAPTCHA_API_KEY"))
 
 
 def wait_for_css(driver, selector: str, timeout: int = 30):
