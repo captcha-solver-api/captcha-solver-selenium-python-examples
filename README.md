@@ -316,6 +316,18 @@ ruff check .
 ruff format --check .
 ```
 
+## Build Faster with AI
+
+Give [`llms.txt`](https://captcha-solver.com/llms.txt) to your AI assistant so it
+uses the current API parameters and solution format while adapting these
+Selenium examples to your page.
+
+```text
+Read https://captcha-solver.com/llms.txt and adapt the matching Selenium Python
+example from this repository to my target page: [describe the page and CAPTCHA].
+Show how to collect the required parameters and apply the returned solution.
+```
+
 ## Useful links
 
 - [Python SDK](https://github.com/captcha-solver-api/python-sdk)
