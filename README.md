@@ -8,9 +8,9 @@ They show how to detect captcha parameters on a live page, create the correct AP
 task, receive a solution, and apply it in a Selenium browser session.
 
 The repository includes reCAPTCHA v2 and v3, callback-based reCAPTCHA,
-Cloudflare Turnstile and Challenge pages, image recognition, coordinate captchas,
-and proxy-based flows. SeleniumBase manages Chrome while standard Selenium APIs
-handle elements, waits, scripts, and mouse actions.
+Cloudflare Turnstile and Challenge pages, Tencent CAPTCHA, image recognition,
+coordinate captchas, and proxy-based flows. SeleniumBase manages Chrome while
+standard Selenium APIs handle elements, waits, scripts, and mouse actions.
 
 ## Contents
 
@@ -19,6 +19,7 @@ handle elements, waits, scripts, and mouse actions.
 - [Available examples](#available-examples)
 - [reCAPTCHA examples](#recaptcha-examples)
 - [Cloudflare examples](#cloudflare-examples)
+- [Tencent CAPTCHA](#tencent-captcha)
 - [Image and coordinate examples](#image-and-coordinate-examples)
 - [Proxy configuration](#proxy-configuration)
 - [How the examples work](#how-the-examples-work)
@@ -117,6 +118,7 @@ The API key is never printed.
 | reCAPTCHA v3 | [`recaptcha_v3_extended_js_script.py`](examples/recaptcha_v3_extended_js_script.py) | Compatibility entry point for script-based discovery |
 | Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare_turnstile.py) | Solve an embedded widget and submit its form |
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare_challenge_page.py) | Intercept dynamic parameters and invoke the captured callback |
+| Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) | Capture `appId` and return the complete solution to the original callback |
 | Image captcha | [`normal_captcha_screenshot.py`](examples/normal_captcha_screenshot.py) | Capture the element as a screenshot |
 | Image captcha | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) | Extract the original image through canvas |
 | Image captcha + hints | [`normal_captcha_screenshot_params.py`](examples/normal_captcha_screenshot_params.py) | Supply numeric and length constraints |
@@ -198,6 +200,29 @@ python examples/cloudflare_challenge_page.py
 If the page already reports a successful challenge, the example exits without
 creating another paid task.
 
+## Tencent CAPTCHA
+
+[`tencent.py`](examples/tencent.py) installs an interception script before page
+navigation. It captures the page's `TencentCaptcha` constructor call, creates a
+`TencentTaskProxyless`, and passes the complete solution to the original callback.
+
+The example does not include a target site. Set your own page and the element
+that confirms successful verification:
+
+```dotenv
+TARGET_URL=https://your-site.example/tencent-captcha
+TENCENT_TRIGGER_SELECTOR=#open-captcha
+TENCENT_SUCCESS_SELECTOR=.verification-success
+```
+
+Leave `TENCENT_TRIGGER_SELECTOR` blank when the page opens Tencent CAPTCHA
+automatically. `TENCENT_SUCCESS_SELECTOR` is required so the example verifies
+that the page accepted the answer.
+
+```bash
+python examples/tencent.py
+```
+
 ## Image and coordinate examples
 
 ### Image captcha
@@ -263,7 +288,8 @@ Every script follows the same reusable sequence:
 2. Extract fresh captcha parameters or image data from the loaded page.
 3. Create the matching task from `captcha_solver_api.tasks`.
 4. Call `CaptchaClient.solve()` and wait for the solution.
-5. Apply the returned token, text, or coordinates in the same browser session.
+5. Apply the returned token, text, coordinates, or callback data in the same
+   browser session.
 6. Wait for the page's success state.
 
 The shared helpers in [`examples/common.py`](examples/common.py) load `.env`,
@@ -302,6 +328,12 @@ or callback discovery logic for the current page.
 The interception script must run before the refreshed page initializes Turnstile.
 Use the provided Challenge example as the entry point so it can register the CDP
 script and perform the required refresh.
+
+### Tencent parameters are not captured
+
+The target page must construct `TencentCaptcha` after the interception script is
+installed. Set `TENCENT_TRIGGER_SELECTOR` to the control that opens the captcha,
+or leave it blank when the page opens the captcha during load.
 
 ### A proxy example times out
 
