@@ -50,7 +50,8 @@ CAPTCHA_API_KEY=your_api_key
 python examples/recaptcha_v2.py
 ```
 
-The reCAPTCHA v2 example uses the official Google demo by default. Set
+The reCAPTCHA v2 example uses the official Google demo by default, and the
+Yandex SmartCaptcha example uses the official Yandex demo. Set
 `TARGET_URL` in `.env` to run another example against a page you are
 authorized to test.
 
@@ -68,10 +69,36 @@ authorized to test.
 | Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare_turnstile.py) |
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare_challenge_page.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) |
+| Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex_smartcaptcha.py) |
 | Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/normal_captcha_screenshot.py) |
 | Image captcha, canvas | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) |
 | Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/normal_captcha_screenshot_params.py) |
 | Coordinates | [`coordinates.py`](examples/coordinates.py) |
+
+## Yandex SmartCaptcha
+
+After installation, set `CAPTCHA_API_KEY` in `.env` and run:
+
+```bash
+python examples/yandex_smartcaptcha.py
+```
+
+Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
+The example reads the widget's `data-sitekey` and the browser's User-Agent,
+requests a token using `YandexSmartCaptchaTaskProxyless`, fills `smart-token`,
+and submits the form. It reports success only after the page returns
+`Hello, user!`.
+
+The example uses the same `.env` configuration, shared API client, and
+console logging as the other examples. Running it creates a paid solving task.
+
+To adapt it to a page you are authorized to test, set `TARGET_URL` and update
+`SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.
+If your application uses a callback instead of reading `smart-token`, adapt
+the token delivery to that callback as well.
+
+- [Yandex SmartCaptcha task parameters](https://captcha-solver.com/en/docs/captcha-types#yandex-smartcaptcha)
+- [Yandex SmartCaptcha code examples](https://captcha-solver.com/en/docs/code-examples#yandex-smartcaptcha)
 
 ## Tencent CAPTCHA
 
