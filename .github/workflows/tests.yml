@@ -7,13 +7,15 @@ on:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Python 3.9 is not available on the Ubuntu 26.04 image currently behind
+    # ubuntu-latest. Keep the oldest supported Python version test on 24.04.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: ["3.9", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
