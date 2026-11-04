@@ -34,6 +34,7 @@ def main() -> None:
                 pageAction=params["action"],
             )
         )
+        # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyRecaptcha(arguments[0]);",
             solution["gRecaptchaResponse"],

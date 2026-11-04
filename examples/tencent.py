@@ -98,6 +98,7 @@ def main() -> None:
         )
         record_id = params.pop("id")
         solution = client.solve(TencentTaskProxyless(**params))
+        # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.__captchaSolverTencent.submit(arguments[0], arguments[1])",
             record_id,

@@ -45,6 +45,7 @@ def main() -> None:
         if not isinstance(token, str) or not token.strip():
             raise RuntimeError("Captcha Solver returned an empty SmartCaptcha token")
 
+        # Token injection and submission are site-specific; adapt this step to the target page.
         # This demo submits the token through a hidden form field.
         wait_for_css(driver, 'input[name="smart-token"]')
         fill_response_field(driver, "smart-token", token)

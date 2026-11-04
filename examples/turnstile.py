@@ -29,6 +29,7 @@ def main() -> None:
         print(f"Sitekey received: {sitekey}")
 
         solution = client.solve(TurnstileTaskProxyless(websiteURL=URL, websiteKey=sitekey))
+        # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "cf-turnstile-response", solution["token"])
         print("Token sent")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()

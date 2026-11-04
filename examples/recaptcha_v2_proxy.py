@@ -44,6 +44,7 @@ def main() -> None:
                 **proxy_settings(),
             )
         )
+        # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "g-recaptcha-response", solution["gRecaptchaResponse"])
         print("Token sent")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()

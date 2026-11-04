@@ -84,6 +84,7 @@ def main() -> None:
         print("Parameters received")
         solution = client.solve(TurnstileTaskProxyless(**params))
 
+        # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
             if (typeof window.__turnstileCallback !== 'function') {

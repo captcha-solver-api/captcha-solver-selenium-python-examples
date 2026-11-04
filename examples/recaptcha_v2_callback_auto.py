@@ -47,6 +47,7 @@ def main() -> None:
         solution = client.solve(
             RecaptchaV2TaskProxyless(websiteURL=URL, websiteKey=params["sitekey"])
         )
+        # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
             const callback = arguments[0]

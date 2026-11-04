@@ -42,6 +42,7 @@ def main() -> None:
                 **proxy_settings(),
             )
         )
+        # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyDemoRecaptcha(arguments[0]);",
             solution["gRecaptchaResponse"],

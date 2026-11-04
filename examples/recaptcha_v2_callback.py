@@ -17,6 +17,7 @@ def main() -> None:
         sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
         print(f"Sitekey received: {sitekey}")
         solution = client.solve(RecaptchaV2TaskProxyless(websiteURL=URL, websiteKey=sitekey))
+        # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyDemoRecaptcha(arguments[0]);",
             solution["gRecaptchaResponse"],
