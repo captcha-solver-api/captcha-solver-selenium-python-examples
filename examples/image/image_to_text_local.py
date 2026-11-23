@@ -30,19 +30,32 @@ load_dotenv(REPOSITORY_ROOT / ".env")
 
 def main() -> None:
     # STEP-01: The SDK expects Base64 image data without a data-URL prefix.
+    print("\n[STEP-01] The SDK expects Base64 image data without a data-URL prefix.", flush=True)
     image = base64.b64encode(IMAGE_PATH.read_bytes()).decode("ascii")
 
     # STEP-02: Read the API key explicitly so this file remains self-contained.
+
+    print(
+        "\n[STEP-02] Read the API key explicitly so this file remains self-contained.", flush=True
+    )
     api_key = os.getenv("CAPTCHA_API_KEY")
     if not api_key:
         raise RuntimeError("Set CAPTCHA_API_KEY in the environment or .env file")
 
-    with CaptchaClient(api_key) as client:
+    with CaptchaClient(api_key, debug=True) as client:
         # STEP-03: Create the image recognition task and wait for its solution.
+        print(
+            "\n[STEP-03] Create the image recognition task and wait for its solution.", flush=True
+        )
         task = ImageToTextTask(body=image)
         solution = client.solve(task)
 
         # STEP-04: ImageToTextTask returns the recognized answer in the text field.
+
+        print(
+            "\n[STEP-04] ImageToTextTask returns the recognized answer in the text field.",
+            flush=True,
+        )
         print("Recognized text:", solution["text"])
 
 

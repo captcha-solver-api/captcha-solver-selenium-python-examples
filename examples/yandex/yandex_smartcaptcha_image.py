@@ -39,22 +39,36 @@ def encode_image(path: Path) -> str:
 
 def main() -> None:
     # STEP-01: Read both parts of the same captured challenge from local assets.
+    print(
+        "\n[STEP-01] Read both parts of the same captured challenge from local assets.", flush=True
+    )
     challenge = encode_image(CHALLENGE_IMAGE)
     instructions = encode_image(INSTRUCTION_IMAGE)
 
     # STEP-02: Create the SDK client with the API key from the environment.
+
+    print("\n[STEP-02] Create the SDK client with the API key from the environment.", flush=True)
     api_key = os.getenv("CAPTCHA_API_KEY")
     if not api_key:
         raise RuntimeError("Set CAPTCHA_API_KEY in the environment or .env file")
 
-    with CaptchaClient(api_key) as client:
+    with CaptchaClient(api_key, debug=True) as client:
         # STEP-03: Keep the main image and click-order instructions together in one task.
+        print(
+            "\n[STEP-03] Keep the main image and click-order instructions together in one task.",
+            flush=True,
+        )
         task = YandexSmartCaptchaImageTask(
             image=challenge,
             imgInstructions=instructions,
         )
 
         # STEP-04: solve() creates the task, waits for it, and returns ordered coordinates.
+
+        print(
+            "\n[STEP-04] solve() creates the task, waits for it, and returns ordered coordinates.",
+            flush=True,
+        )
         solution = client.solve(task)
         print("Ordered click coordinates:", solution["coordinates"])
 

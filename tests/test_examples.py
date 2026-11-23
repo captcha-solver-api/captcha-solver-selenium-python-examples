@@ -48,6 +48,22 @@ class ExampleStructureTests(unittest.TestCase):
                     map_steps, [f"{number:02d}" for number in range(1, len(map_steps) + 1)]
                 )
 
+    def test_each_code_step_has_matching_console_heading(self):
+        for path in self.example_files():
+            source = path.read_text(encoding="utf-8")
+            code_steps = re.findall(r"STEP-(\d{2}):", source)
+            console_steps = re.findall(r'print\(\s*f?"\\n\[STEP-(\d{2})\]', source)
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertEqual(console_steps, code_steps)
+
+    def test_sdk_debug_output_is_enabled(self):
+        for path in self.example_files():
+            source = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertIn("CaptchaClient(", source)
+                self.assertIn("debug=True", source)
+                self.assertNotIn('print("Solution:", solution)', source)
+
     def test_browser_examples_explain_adaptation(self):
         for path in self.example_files():
             source = path.read_text(encoding="utf-8")

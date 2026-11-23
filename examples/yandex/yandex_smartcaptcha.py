@@ -41,7 +41,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_css(driver, selector: str, timeout: int = 30):
@@ -80,8 +80,13 @@ SUCCESS_TEXT = "Hello, user!"
 
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
+    print("\n[STEP-01] Start the browser and SDK client.", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Read the public widget key from the page opened in this browser.
+        print(
+            "\n[STEP-02] Read the public widget key from the page opened in this browser.",
+            flush=True,
+        )
         driver.get(URL)
         widget = wait_for_css(driver, SITEKEY_SELECTOR)
         sitekey = widget.get_attribute("data-sitekey")
@@ -90,18 +95,28 @@ def main() -> None:
         print(f"Sitekey received: {sitekey}")
 
         # STEP-03: Create the task; solve() submits it and waits for its solution.
+
+        print(
+            "\n[STEP-03] Create the task; solve() submits it and waits for its solution.",
+            flush=True,
+        )
         task = YandexSmartCaptchaTaskProxyless(
             websiteURL=driver.current_url,
             websiteKey=sitekey,
             userAgent=driver.execute_script("return navigator.userAgent"),
         )
         solution = client.solve(task, timeout=180)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         token = solution.get("token")
         if not isinstance(token, str) or not token.strip():
             raise RuntimeError("Captcha Solver returned an empty SmartCaptcha token")
 
         # STEP-04: Token injection and submission are site-specific; adapt this step.
+
+        print(
+            "\n[STEP-04] Token injection and submission are site-specific; adapt this step.",
+            flush=True,
+        )
         # This demo submits the token through a hidden form field.
         wait_for_css(driver, 'input[name="smart-token"]')
         fill_response_field(driver, "smart-token", token)
@@ -110,6 +125,11 @@ def main() -> None:
         print("Submitted the form")
 
         # STEP-05: Confirm acceptance by the site, not just receipt of an API token.
+
+        print(
+            "\n[STEP-05] Confirm acceptance by the site, not just receipt of an API token.",
+            flush=True,
+        )
         WebDriverWait(driver, 30).until(
             EC.text_to_be_present_in_element((By.TAG_NAME, "body"), SUCCESS_TEXT)
         )

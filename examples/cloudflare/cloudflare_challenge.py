@@ -41,7 +41,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 URL = required_env("CLOUDFLARE_CHALLENGE_TARGET_URL")
@@ -103,6 +103,7 @@ def capture_params(driver):
 
 def main() -> None:
     # STEP-01: Start Chrome with the same User-Agent sent in the solver task.
+    print("\n[STEP-01] Start Chrome with the same User-Agent sent in the solver task.", flush=True)
     with (
         Driver(browser="chrome", headless=False, agent=BROWSER_USER_AGENT) as driver,
         create_client() as client,
@@ -116,6 +117,9 @@ def main() -> None:
             None,
         )
         # STEP-02: Install the interceptor before reloading the challenge page.
+        print(
+            "\n[STEP-02] Install the interceptor before reloading the challenge page.", flush=True
+        )
         driver.get(URL)
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
@@ -127,11 +131,14 @@ def main() -> None:
             return
         print("Parameters received")
         # STEP-03: Build the task from captured render options and solve it.
+        print("\n[STEP-03] Build the task from captured render options and solve it.", flush=True)
         task = TurnstileTaskProxyless(**params)
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
 
         # STEP-04: Deliver the token to the callback captured from this page.
+
+        print("\n[STEP-04] Deliver the token to the callback captured from this page.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
@@ -144,6 +151,10 @@ def main() -> None:
         )
         print("The token is sent to the callback function")
         # STEP-05: Require a new clearance cookie and a page that is no longer the challenge.
+        print(
+            "\n[STEP-05] Require a new clearance cookie and a page that is no longer the challenge.",
+            flush=True,
+        )
         clearance = WebDriverWait(driver, 30).until(
             lambda current: next(
                 (

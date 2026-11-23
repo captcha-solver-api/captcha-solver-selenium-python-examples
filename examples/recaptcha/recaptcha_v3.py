@@ -42,7 +42,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
@@ -73,14 +73,20 @@ return match?.groups ? {sitekey: match.groups.sitekey, action: match.groups.acti
 
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
+    print("\n[STEP-01] Start the browser and SDK client.", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the page and extract the key/action used by grecaptcha.execute().
+        print(
+            "\n[STEP-02] Open the page and extract the key/action used by grecaptcha.execute().",
+            flush=True,
+        )
         driver.get(URL)
         params = WebDriverWait(driver, 30).until(
             lambda current: current.execute_script(FIND_PARAMS)
         )
         print("Parameters sitekey and action received")
         # STEP-03: Create the score-based task and wait for its token.
+        print("\n[STEP-03] Create the score-based task and wait for its token.", flush=True)
         task = RecaptchaV3TaskProxyless(
             websiteURL=URL,
             websiteKey=params["sitekey"],
@@ -88,8 +94,9 @@ def main() -> None:
             pageAction=params["action"],
         )
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         # STEP-04: Apply the token using this target page's integration.
+        print("\n[STEP-04] Apply the token using this target page's integration.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyRecaptcha(arguments[0]);",
@@ -99,6 +106,7 @@ def main() -> None:
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
         # STEP-05: Verify page acceptance independently of SDK completion.
+        print("\n[STEP-05] Verify page acceptance independently of SDK completion.", flush=True)
         show_success(driver)
 
 

@@ -43,7 +43,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_css(driver, selector: str, timeout: int = 30):
@@ -121,12 +121,18 @@ TENCENT_INTERCEPT_SCRIPT = r"""
 
 def main() -> None:
     # STEP-01: Read target-specific configuration and start the browser/client.
+    print(
+        "\n[STEP-01] Read target-specific configuration and start the browser/client.", flush=True
+    )
     target_url = required_env("TENCENT_TARGET_URL")
     success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
     expected_success_text = required_env("CAPTCHA_SUCCESS_TEXT")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Install the constructor interceptor before opening the page.
+        print(
+            "\n[STEP-02] Install the constructor interceptor before opening the page.", flush=True
+        )
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument", {"source": TENCENT_INTERCEPT_SCRIPT}
         )
@@ -139,6 +145,8 @@ def main() -> None:
             ).click()
 
         # STEP-03: Capture the app ID and other parameters passed by the page.
+
+        print("\n[STEP-03] Capture the app ID and other parameters passed by the page.", flush=True)
         params = WebDriverWait(driver, 30).until(
             lambda browser: browser.execute_script(
                 "return window.__captchaSolverTencent?.pending()[0] || null"
@@ -146,10 +154,12 @@ def main() -> None:
         )
         record_id = params.pop("id")
         # STEP-04: Create the proxyless task and wait for ticket/randstr.
+        print("\n[STEP-04] Create the proxyless task and wait for ticket/randstr.", flush=True)
         task = TencentTaskProxyless(**params)
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         # STEP-05: Deliver the result to the original page callback.
+        print("\n[STEP-05] Deliver the result to the original page callback.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.__captchaSolverTencent.submit(arguments[0], arguments[1])",
@@ -157,6 +167,10 @@ def main() -> None:
             solution,
         )
         # STEP-06: Require the target's configured success element after delivery.
+        print(
+            "\n[STEP-06] Require the target's configured success element after delivery.",
+            flush=True,
+        )
         message = wait_for_css(driver, success_selector)
         WebDriverWait(driver, 30).until(
             EC.text_to_be_present_in_element(

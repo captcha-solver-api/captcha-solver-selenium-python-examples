@@ -90,18 +90,31 @@ load_dotenv(REPOSITORY_ROOT / ".env")
 
 def main() -> None:
     # STEP-01: The SDK expects image bytes as Base64 without a data-URL prefix.
+    print(
+        "\n[STEP-01] The SDK expects image bytes as Base64 without a data-URL prefix.", flush=True
+    )
     image = base64.b64encode(IMAGE_PATH.read_bytes()).decode("ascii")
 
     # STEP-02: Create the SDK client with the API key from the environment.
+
+    print("\n[STEP-02] Create the SDK client with the API key from the environment.", flush=True)
     api_key = os.getenv("CAPTCHA_API_KEY")
     if not api_key:
         raise RuntimeError("Set CAPTCHA_API_KEY in the environment or .env file")
 
-    with CaptchaClient(api_key) as client:
+    with CaptchaClient(api_key, debug=True) as client:
         # STEP-03: The ordered steps must come from the same challenge as the image.
+        print(
+            "\n[STEP-03] The ordered steps must come from the same challenge as the image.",
+            flush=True,
+        )
         task = YandexSmartCaptchaKaleidoscopeTask(image=image, task=PUZZLE_STEPS)
 
         # STEP-04: solve() returns a plain click-count string for this task type.
+
+        print(
+            "\n[STEP-04] solve() returns a plain click-count string for this task type.", flush=True
+        )
         clicks = client.solve(task)
         print("Slider-arrow clicks:", clicks)
 

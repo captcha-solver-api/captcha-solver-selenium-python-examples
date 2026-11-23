@@ -41,7 +41,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
@@ -66,20 +66,25 @@ SUBMIT_LOCATOR = "//button[@type='submit']"
 
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
+    print("\n[STEP-01] Start the browser and SDK client.", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the page and capture only the CAPTCHA image as Base64.
+        print("\n[STEP-02] Open the page and capture only the CAPTCHA image as Base64.", flush=True)
         driver.get(URL)
         captcha = wait_for_xpath(driver, IMAGE_LOCATOR)
         # STEP-03: Create the image task and wait for recognized text.
+        print("\n[STEP-03] Create the image task and wait for recognized text.", flush=True)
         task = ImageToTextTask(body=captcha.screenshot_as_base64)
         solution = client.solve(task)
         print("Recognized text:", solution["text"])
         # STEP-04: Enter the returned text and submit this demo's form.
+        print("\n[STEP-04] Enter the returned text and submit this demo's form.", flush=True)
         wait_for_xpath(driver, ANSWER_LOCATOR).send_keys(solution["text"])
         print("Entered the answer to the captcha")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
         # STEP-05: Verify the page accepted the answer.
+        print("\n[STEP-05] Verify the page accepted the answer.", flush=True)
         show_success(driver)
 
 

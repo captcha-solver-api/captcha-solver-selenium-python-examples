@@ -42,7 +42,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def show_success(driver) -> None:
@@ -85,18 +85,26 @@ return null;
 
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
+    print("\n[STEP-01] Start the browser and SDK client.", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the page and inspect reCAPTCHA's runtime configuration.
+        print(
+            "\n[STEP-02] Open the page and inspect reCAPTCHA's runtime configuration.", flush=True
+        )
         driver.get(URL)
         params = WebDriverWait(driver, 30).until(
             lambda current: current.execute_script(FIND_CLIENT)
         )
         print("Got the callback function name and site key")
         # STEP-03: Create and solve the task with the discovered site key.
+        print("\n[STEP-03] Create and solve the task with the discovered site key.", flush=True)
         task = RecaptchaV2TaskProxyless(websiteURL=URL, websiteKey=params["sitekey"])
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         # STEP-04: Resolve the discovered callback and deliver the token to it.
+        print(
+            "\n[STEP-04] Resolve the discovered callback and deliver the token to it.", flush=True
+        )
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
@@ -111,6 +119,7 @@ def main() -> None:
         )
         print("The token is sent to the callback function")
         # STEP-05: Require the demo page's explicit success message.
+        print("\n[STEP-05] Require the demo page's explicit success message.", flush=True)
         show_success(driver)
 
 

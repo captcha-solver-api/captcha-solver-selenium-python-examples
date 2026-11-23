@@ -43,7 +43,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
@@ -89,11 +89,13 @@ SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
 
 def main() -> None:
     # STEP-01: Start browser and SDK client with one shared proxy.
+    print("\n[STEP-01] Start browser and SDK client with one shared proxy.", flush=True)
     with (
         Driver(browser="chrome", headless=False, cft=True, proxy=selenium_proxy()) as driver,
         create_client() as client,
     ):
         # STEP-02: Open the page through the proxy and extract its site key.
+        print("\n[STEP-02] Open the page through the proxy and extract its site key.", flush=True)
         driver.get(URL)
         try:
             sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
@@ -104,6 +106,7 @@ def main() -> None:
             ) from exc
         print("Got the callback function name and site key")
         # STEP-03: Create and solve the task through the same proxy.
+        print("\n[STEP-03] Create and solve the task through the same proxy.", flush=True)
         task = RecaptchaV2Task(
             websiteURL=URL,
             websiteKey=sitekey,
@@ -111,8 +114,9 @@ def main() -> None:
             **proxy_settings(),
         )
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         # STEP-04: Deliver the token to this demo's callback.
+        print("\n[STEP-04] Deliver the token to this demo's callback.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyDemoRecaptcha(arguments[0]);",
@@ -120,6 +124,7 @@ def main() -> None:
         )
         print("The token is sent to the callback function")
         # STEP-05: Verify successful callback handling on the page.
+        print("\n[STEP-05] Verify successful callback handling on the page.", flush=True)
         show_success(driver)
 
 

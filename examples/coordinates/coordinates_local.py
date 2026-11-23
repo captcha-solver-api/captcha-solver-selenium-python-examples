@@ -30,19 +30,35 @@ load_dotenv(REPOSITORY_ROOT / ".env")
 
 def main() -> None:
     # STEP-01: Preserve the source pixels because returned points use this coordinate system.
+    print(
+        "\n[STEP-01] Preserve the source pixels because returned points use this coordinate system.",
+        flush=True,
+    )
     image = base64.b64encode(IMAGE_PATH.read_bytes()).decode("ascii")
 
     # STEP-02: Read the API key explicitly so this file remains self-contained.
+
+    print(
+        "\n[STEP-02] Read the API key explicitly so this file remains self-contained.", flush=True
+    )
     api_key = os.getenv("CAPTCHA_API_KEY")
     if not api_key:
         raise RuntimeError("Set CAPTCHA_API_KEY in the environment or .env file")
 
-    with CaptchaClient(api_key) as client:
+    with CaptchaClient(api_key, debug=True) as client:
         # STEP-03: Ask for ordered click points on the bundled challenge image.
+        print(
+            "\n[STEP-03] Ask for ordered click points on the bundled challenge image.", flush=True
+        )
         task = CoordinatesTask(body=image)
         solution = client.solve(task)
 
         # STEP-04: Coordinates are relative to the original asset, not a resized DOM element.
+
+        print(
+            "\n[STEP-04] Coordinates are relative to the original asset, not a resized DOM element.",
+            flush=True,
+        )
         print("Ordered click coordinates:", solution["coordinates"])
 
 

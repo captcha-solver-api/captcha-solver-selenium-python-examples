@@ -41,7 +41,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
@@ -81,8 +81,10 @@ SUBMIT_LOCATOR = "//button[@type='submit']"
 
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
+    print("\n[STEP-01] Start the browser and SDK client.", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the page and extract the widget's public site key.
+        print("\n[STEP-02] Open the page and extract the widget's public site key.", flush=True)
         driver.get(URL)
         widget = wait_for_xpath(driver, SITEKEY_LOCATOR)
         sitekey = widget.get_attribute("data-sitekey")
@@ -91,16 +93,20 @@ def main() -> None:
         print(f"Sitekey received: {sitekey}")
 
         # STEP-03: Create and solve the proxyless Turnstile task.
+
+        print("\n[STEP-03] Create and solve the proxyless Turnstile task.", flush=True)
         task = TurnstileTaskProxyless(websiteURL=URL, websiteKey=sitekey)
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         # STEP-04: Put the token into this demo's response field.
+        print("\n[STEP-04] Put the token into this demo's response field.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "cf-turnstile-response", solution["token"])
         print("Token sent")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
         # STEP-05: Require the page's success message after submission.
+        print("\n[STEP-05] Require the page's success message after submission.", flush=True)
         show_success(driver)
 
 

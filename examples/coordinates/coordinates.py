@@ -44,7 +44,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_css(driver, selector: str, timeout: int = 30):
@@ -89,18 +89,32 @@ def png_size(png_base64: str):
 
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
+    print("\n[STEP-01] Start the browser and SDK client.", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Capture the source pixels and dimensions of the rendered click CAPTCHA.
+        print(
+            "\n[STEP-02] Capture the source pixels and dimensions of the rendered click CAPTCHA.",
+            flush=True,
+        )
         driver.get(URL)
         captcha = wait_for_css(driver, IMAGE_SELECTOR)
         image = driver.execute_script(CANVAS_SCRIPT, IMAGE_SELECTOR)
         image_width, image_height = png_size(image)
         # STEP-03: Create the coordinate task and wait for image-space click points.
+        print(
+            "\n[STEP-03] Create the coordinate task and wait for image-space click points.",
+            flush=True,
+        )
         task = CoordinatesTask(body=image)
         solution = client.solve(task)
         print("Ordered click coordinates:", solution["coordinates"])
 
         # STEP-04: Scale source-image points to the displayed element before clicking.
+
+        print(
+            "\n[STEP-04] Scale source-image points to the displayed element before clicking.",
+            flush=True,
+        )
         scale_x = captcha.size["width"] / image_width
         scale_y = captcha.size["height"] / image_height
         print(
@@ -125,6 +139,7 @@ def main() -> None:
         driver.execute_script("arguments[0].click();", submit)
         print("Pressed the Check button")
         # STEP-05: Submit the clicks and require the page's success message.
+        print("\n[STEP-05] Submit the clicks and require the page's success message.", flush=True)
         show_success(driver)
 
 

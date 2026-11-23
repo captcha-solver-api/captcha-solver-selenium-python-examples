@@ -43,7 +43,7 @@ def required_env(name: str) -> str:
 
 def create_client() -> CaptchaClient:
     """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
 
 
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
@@ -106,11 +106,15 @@ SUBMIT_LOCATOR = "//button[@data-action='demo_action']"
 
 def main() -> None:
     # STEP-01: Start browser and SDK client with one shared proxy configuration.
+    print(
+        "\n[STEP-01] Start browser and SDK client with one shared proxy configuration.", flush=True
+    )
     with (
         Driver(browser="chrome", headless=False, cft=True, proxy=selenium_proxy()) as driver,
         create_client() as client,
     ):
         # STEP-02: Open the page through the proxy and extract its site key.
+        print("\n[STEP-02] Open the page through the proxy and extract its site key.", flush=True)
         driver.get(URL)
         try:
             sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
@@ -121,6 +125,7 @@ def main() -> None:
             ) from exc
         print(f"Sitekey received: {sitekey}")
         # STEP-03: Create the proxied task with the browser's User-Agent.
+        print("\n[STEP-03] Create the proxied task with the browser's User-Agent.", flush=True)
         task = RecaptchaV2Task(
             websiteURL=URL,
             websiteKey=sitekey,
@@ -128,14 +133,16 @@ def main() -> None:
             **proxy_settings(),
         )
         solution = client.solve(task)
-        print("Solution:", solution)
+        print("Solution received; fields:", ", ".join(solution), flush=True)
         # STEP-04: Apply the token and submit this page's form.
+        print("\n[STEP-04] Apply the token and submit this page's form.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "g-recaptcha-response", solution["gRecaptchaResponse"])
         print("Token sent")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
         # STEP-05: Require the page's success message.
+        print("\n[STEP-05] Require the page's success message.", flush=True)
         show_success(driver)
 
 
