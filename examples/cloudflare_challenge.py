@@ -1,50 +1,15 @@
-"""Intercept and solve Turnstile on a Cloudflare Challenge page.
-
-What it does:
-    Intercepts Turnstile render parameters on CLOUDFLARE_CHALLENGE_TARGET_URL, solves TurnstileTaskProxyless with the
-    browser User-Agent, delivers the token to the captured callback, and checks page acceptance.
-
-To use this example on another page, change its type-specific target URL and inspect the
-site key or challenge parameters, solution fields or callbacks, submission controls, and exact success
-signal before applying the result.
-
-How it works:
-    STEP-01 - starts browser/client.
-    STEP-02 - installs the interceptor.
-    STEP-03 - solves from captured
-    parameters.
-    STEP-04 - invokes the callback.
-    STEP-05 - checks the explicit success signal.
-"""
+"""Intercept and solve Turnstile on a Cloudflare Challenge page."""
 
 import os
-from pathlib import Path
+import time
 
-from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import TurnstileTaskProxyless
-from dotenv import load_dotenv
+from common import create_client, logged_example, required_env, show_success
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(REPOSITORY_ROOT / ".env")
-
-
-def required_env(name: str) -> str:
-    """Return a required environment value or explain how to configure it."""
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"Set {name} in the environment or .env file")
-    return value
-
-
-def create_client() -> CaptchaClient:
-    """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
-
-
-URL = required_env("CLOUDFLARE_CHALLENGE_TARGET_URL")
+URL = required_env("TARGET_URL")
 BROWSER_USER_AGENT = os.getenv("BROWSER_USER_AGENT") or (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
@@ -101,25 +66,14 @@ def capture_params(driver):
     return state["params"]
 
 
+@logged_example
 def main() -> None:
     # STEP-01: Start Chrome with the same User-Agent sent in the solver task.
-    print("\n[STEP-01] Start Chrome with the same User-Agent sent in the solver task.", flush=True)
     with (
         Driver(browser="chrome", headless=False, agent=BROWSER_USER_AGENT) as driver,
         create_client() as client,
     ):
-        initial_clearance = next(
-            (
-                cookie["value"]
-                for cookie in driver.get_cookies()
-                if cookie["name"] == "cf_clearance"
-            ),
-            None,
-        )
         # STEP-02: Install the interceptor before reloading the challenge page.
-        print(
-            "\n[STEP-02] Install the interceptor before reloading the challenge page.", flush=True
-        )
         driver.get(URL)
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
@@ -131,14 +85,9 @@ def main() -> None:
             return
         print("Parameters received")
         # STEP-03: Build the task from captured render options and solve it.
-        print("\n[STEP-03] Build the task from captured render options and solve it.", flush=True)
-        task = TurnstileTaskProxyless(**params)
-        solution = client.solve(task)
-        print("Solution received; fields:", ", ".join(solution), flush=True)
+        solution = client.solve(TurnstileTaskProxyless(**params))
 
         # STEP-04: Deliver the token to the callback captured from this page.
-
-        print("\n[STEP-04] Deliver the token to the callback captured from this page.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
@@ -150,24 +99,9 @@ def main() -> None:
             solution["token"],
         )
         print("The token is sent to the callback function")
-        # STEP-05: Require a new clearance cookie and a page that is no longer the challenge.
-        print(
-            "\n[STEP-05] Require a new clearance cookie and a page that is no longer the challenge.",
-            flush=True,
-        )
-        clearance = WebDriverWait(driver, 30).until(
-            lambda current: next(
-                (
-                    cookie["value"]
-                    for cookie in current.get_cookies()
-                    if cookie["name"] == "cf_clearance" and cookie["value"] != initial_clearance
-                ),
-                None,
-            )
-        )
-        if "challenge" in driver.current_url.lower():
-            raise RuntimeError("A new clearance cookie was set, but the challenge page remained")
-        print(f"Cloudflare accepted the solution; new clearance cookie: {clearance[:8]}...")
+        # STEP-05: Verify the page's explicit success signal after callback delivery.
+        show_success(driver)
+        time.sleep(10)
 
 
 if __name__ == "__main__":

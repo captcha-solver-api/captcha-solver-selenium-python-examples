@@ -1,61 +1,17 @@
-"""Solve Tencent CAPTCHA on a user-configured page.
-
-What it does:
-    Installs an interceptor before TENCENT_TARGET_URL loads, captures Tencent constructor parameters,
-    solves TencentTaskProxyless, delivers ticket/randstr to the original callback, and checks the
-    target-specific success element.
-
-To use this example on another page, change its type-specific target URL and inspect the
-site key or challenge parameters, solution fields or callbacks, submission controls, and exact success
-signal before applying the result.
-
-How it works:
-    STEP-01 - loads configuration.
-    STEP-02 - installs interception.
-    STEP-03 - captures parameters.
-    STEP-04 - solves the task.
-    STEP-05 - invokes the callback.
-    STEP-06 - checks the page signal.
-"""
+"""Solve Tencent CAPTCHA on a user-configured page."""
 
 import os
-from pathlib import Path
+import time
 
-from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import TencentTaskProxyless
-from dotenv import load_dotenv
+from common import create_client, logged_example, required_env, wait_for_css
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(REPOSITORY_ROOT / ".env")
-
-
-def required_env(name: str) -> str:
-    """Return a required environment value or explain how to configure it."""
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"Set {name} in the environment or .env file")
-    return value
-
-
-def create_client() -> CaptchaClient:
-    """Create the SDK client with CAPTCHA_API_KEY."""
-    return CaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
-
-
-def wait_for_css(driver, selector: str, timeout: int = 30):
-    """Wait until a target-specific CSS selector exists."""
-    return WebDriverWait(driver, timeout).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-    )
-
-
 TENCENT_INTERCEPT_SCRIPT = r"""
 (() => {
-  const CALLBACK_OR_OPTIONS_INDEX = 1;
   const records = new Map();
   const wrappers = new WeakMap();
   let constructor;
@@ -66,10 +22,9 @@ TENCENT_INTERCEPT_SCRIPT = r"""
     if (wrappers.has(Original)) return wrappers.get(Original);
     const Wrapped = new Proxy(Original, {
       construct(Target, args, newTarget) {
-        const appIdIndex = typeof args[CALLBACK_OR_OPTIONS_INDEX] === 'function' ? 0 : 1;
-        const callbackIndex = appIdIndex + 1;
-        const appId = args[appIdIndex];
-        const callback = args[callbackIndex];
+        const offset = typeof args[1] === 'function' ? 0 : 1;
+        const appId = args[offset];
+        const callback = args[offset + 1];
         if (!appId || typeof callback !== 'function') {
           return Reflect.construct(Target, args, newTarget);
         }
@@ -83,7 +38,7 @@ TENCENT_INTERCEPT_SCRIPT = r"""
             .find(src => /\/TCaptcha-global\.js(?:\?|$)/i.test(src))
         };
         const nativeArgs = [...args];
-        nativeArgs[callbackIndex] = () => {};
+        nativeArgs[offset + 1] = () => {};
         const instance = Reflect.construct(Target, nativeArgs, newTarget);
         instance.show = () => {};
         records.set(id, {params, callback, submitted: false});
@@ -119,20 +74,14 @@ TENCENT_INTERCEPT_SCRIPT = r"""
 """
 
 
+@logged_example
 def main() -> None:
     # STEP-01: Read target-specific configuration and start the browser/client.
-    print(
-        "\n[STEP-01] Read target-specific configuration and start the browser/client.", flush=True
-    )
-    target_url = required_env("TENCENT_TARGET_URL")
+    target_url = required_env("TARGET_URL")
     success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
-    expected_success_text = required_env("CAPTCHA_SUCCESS_TEXT")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Install the constructor interceptor before opening the page.
-        print(
-            "\n[STEP-02] Install the constructor interceptor before opening the page.", flush=True
-        )
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument", {"source": TENCENT_INTERCEPT_SCRIPT}
         )
@@ -145,8 +94,6 @@ def main() -> None:
             ).click()
 
         # STEP-03: Capture the app ID and other parameters passed by the page.
-
-        print("\n[STEP-03] Capture the app ID and other parameters passed by the page.", flush=True)
         params = WebDriverWait(driver, 30).until(
             lambda browser: browser.execute_script(
                 "return window.__captchaSolverTencent?.pending()[0] || null"
@@ -154,12 +101,8 @@ def main() -> None:
         )
         record_id = params.pop("id")
         # STEP-04: Create the proxyless task and wait for ticket/randstr.
-        print("\n[STEP-04] Create the proxyless task and wait for ticket/randstr.", flush=True)
-        task = TencentTaskProxyless(**params)
-        solution = client.solve(task)
-        print("Solution received; fields:", ", ".join(solution), flush=True)
+        solution = client.solve(TencentTaskProxyless(**params))
         # STEP-05: Deliver the result to the original page callback.
-        print("\n[STEP-05] Deliver the result to the original page callback.", flush=True)
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.__captchaSolverTencent.submit(arguments[0], arguments[1])",
@@ -167,17 +110,10 @@ def main() -> None:
             solution,
         )
         # STEP-06: Require the target's configured success element after delivery.
-        print(
-            "\n[STEP-06] Require the target's configured success element after delivery.",
-            flush=True,
-        )
         message = wait_for_css(driver, success_selector)
-        WebDriverWait(driver, 30).until(
-            EC.text_to_be_present_in_element(
-                (By.CSS_SELECTOR, success_selector), expected_success_text
-            )
-        )
+        WebDriverWait(driver, 30).until(EC.visibility_of(message))
         print(message.text)
+        time.sleep(5)
 
 
 if __name__ == "__main__":

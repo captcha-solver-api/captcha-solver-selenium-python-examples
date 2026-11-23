@@ -7,16 +7,12 @@ Examples of solving popular captcha types with
 [Selenium](https://www.selenium.dev/), and
 [`seleniumbase`](https://seleniumbase.io/).
 
-Browser-based examples show how to:
+Each example shows how to:
 
 1. Open a page and collect captcha parameters.
 2. Send a task to Captcha Solver.
 3. Apply the solution in the browser.
 4. Check that the page accepted the solution.
-
-Local image examples instead show how to read bundled assets, create an SDK
-task, and interpret the returned text, coordinates, or click count. Applying
-those results and confirming acceptance require the original browser page.
 
 ## Installation
 
@@ -51,109 +47,52 @@ CAPTCHA_API_KEY=your_api_key
 ## Run
 
 ```bash
-python examples/recaptcha/recaptcha_v2.py
+python examples/recaptcha_v2.py
 ```
 
 The reCAPTCHA v2 example uses the official Google demo by default, and the
-Yandex SmartCaptcha example uses the official Yandex demo. Other browser examples use the
-type-specific target variables from `.env.example`; replace their `example.com` placeholders
-with pages you are authorized to test. Set `CAPTCHA_SUCCESS_TEXT` to the exact confirmation text
-returned by that target page.
-
-> [!IMPORTANT]
-> Browser and local examples create paid solving tasks. A solution returned by the SDK proves
-> only that the service completed the task. Browser examples separately verify the configured
-> page signal; local image examples cannot prove page acceptance.
+Yandex SmartCaptcha example uses the official Yandex demo. Set
+`TARGET_URL` in `.env` to run another example against a page you are
+authorized to test.
 
 ## Examples
 
-Examples are grouped by CAPTCHA provider or challenge type. Each file is self-contained and can
-be run directly from the repository root.
-
-| Group | Captcha | File |
-|---|---|---|
-| reCAPTCHA | v2 | [`recaptcha_v2.py`](examples/recaptcha/recaptcha_v2.py) |
-| reCAPTCHA | v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha/recaptcha_v2_proxy.py) |
-| reCAPTCHA | v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha/recaptcha_v2_callback.py) |
-| reCAPTCHA | v2 callback, automatic discovery | [`recaptcha_v2_callback_auto.py`](examples/recaptcha/recaptcha_v2_callback_auto.py) |
-| reCAPTCHA | v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
-| reCAPTCHA | v3 | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
-| Cloudflare | Turnstile | [`turnstile.py`](examples/cloudflare/turnstile.py) |
-| Cloudflare | Challenge | [`cloudflare_challenge.py`](examples/cloudflare/cloudflare_challenge.py) |
-| Tencent | Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
-| Yandex | SmartCaptcha token | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
-| Yandex | SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
-| Yandex | SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex/yandex_smartcaptcha_kaleidoscope.py) |
-| Image-to-text | Browser screenshot | [`image_to_text.py`](examples/image/image_to_text.py) |
-| Image-to-text | Browser canvas | [`normal_captcha_canvas.py`](examples/image/normal_captcha_canvas.py) |
-| Image-to-text | Recognition parameters | [`normal_captcha_params.py`](examples/image/normal_captcha_params.py) |
-| Image-to-text | Bundled image | [`image_to_text_local.py`](examples/image/image_to_text_local.py) |
-| Coordinates | Browser clicks | [`coordinates.py`](examples/coordinates/coordinates.py) |
-| Coordinates | Bundled image | [`coordinates_local.py`](examples/coordinates/coordinates_local.py) |
-
-### Solution fields and proxy usage
-
-| Task family | Proxy status | `solve()` result used by the example |
-|---|---|---|
-| reCAPTCHA v2/v3 | Proxyless or Proxy, as named in the file | `gRecaptchaResponse` token |
-| Turnstile / Cloudflare Challenge | Proxyless | `token`; Challenge also requires a new `cf_clearance` cookie |
-| Yandex SmartCaptcha token | Proxyless | `token` |
-| Yandex SmartCaptcha image | Not applicable; images are uploaded directly | ordered `coordinates` |
-| Yandex Kaleidoscope | Not applicable; image data is uploaded directly | slider-arrow click count string |
-| Image-to-text | Not applicable; image data is uploaded directly | recognized `text` |
-| Coordinates | Not applicable; image data is uploaded directly | ordered `coordinates` |
-| Tencent | Proxyless | ticket/randstr solution passed to the page callback |
-
-These values are the return value of `CaptchaClient.solve()`, not the complete transport response.
-Uncaught configuration, browser, SDK, and verification errors terminate the Python process with a
-non-zero exit code; browser context managers close their sessions during normal exception cleanup.
+| Captcha | File |
+|---|---|
+| reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha_v2.py) |
+| reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha_v2_proxy.py) |
+| reCAPTCHA v2 callback | [`recaptcha_v2_callback_variant1.py`](examples/recaptcha_v2_callback_variant1.py) |
+| reCAPTCHA v2 callback, automatic discovery | [`recaptcha_v2_callback_variant2.py`](examples/recaptcha_v2_callback_variant2.py) |
+| reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha_v2_callback_proxy.py) |
+| reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha_v3.py) |
+| reCAPTCHA v3 interception | [`recaptcha_v3_extended_js_script.py`](examples/recaptcha_v3_extended_js_script.py) |
+| Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare_turnstile.py) |
+| Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare_challenge_page.py) |
+| Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) |
+| Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex_smartcaptcha.py) |
+| Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/normal_captcha_screenshot.py) |
+| Image captcha, canvas | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) |
+| Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/normal_captcha_screenshot_params.py) |
+| Coordinates | [`coordinates.py`](examples/coordinates.py) |
 
 ## Yandex SmartCaptcha
 
 After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 
 ```bash
-python examples/yandex/yandex_smartcaptcha.py
+python examples/yandex_smartcaptcha.py
 ```
 
-Leave `YANDEX_SMARTCAPTCHA_TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
+Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
 The example reads the widget's `data-sitekey` and the browser's User-Agent,
 requests a token using `YandexSmartCaptchaTaskProxyless`, fills `smart-token`,
 and submits the form. It reports success only after the page returns
 `Hello, user!`.
 
-The example loads the same `.env` template as the other examples but keeps client creation,
-parameter extraction, task construction, submission, and verification in its own file.
+The example uses the same `.env` configuration, shared API client, and
+console logging as the other examples. Running it creates a paid solving task.
 
-Two image-based examples use captured assets and do not open a browser:
-
-```bash
-python examples/yandex/yandex_smartcaptcha_image.py
-python examples/yandex/yandex_smartcaptcha_kaleidoscope.py
-```
-
-The image example returns ordered points to click. The Kaleidoscope example
-returns the required number of slider-arrow clicks. These examples demonstrate
-task creation and result handling; applying a captured result and checking that
-a live page accepts it are necessarily site-specific.
-
-## Bundled image assets
-
-Reusable captures are grouped under `assets/`:
-
-- `assets/image-to-text/` contains text, digits, and math CAPTCHA images plus math instructions;
-- `assets/coordinates/` contains generic coordinates, fruit, and traffic-light challenges plus
-  traffic-light instructions;
-- `assets/yandex/` contains SmartCaptcha image, instruction, and Kaleidoscope captures.
-
-Run the basic local examples with:
-
-```bash
-python examples/image/image_to_text_local.py
-python examples/coordinates/coordinates_local.py
-```
-
-To adapt it to a page you are authorized to test, set `YANDEX_SMARTCAPTCHA_TARGET_URL` and update
+To adapt it to a page you are authorized to test, set `TARGET_URL` and update
 `SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.
 If your application uses a callback instead of reading `smart-token`, adapt
 the token delivery to that callback as well.
@@ -166,7 +105,7 @@ the token delivery to that callback as well.
 Tencent requires your own target page and selectors:
 
 ```dotenv
-TENCENT_TARGET_URL=https://example.com/page_with_tencent_captcha
+TARGET_URL=https://your-site.example/tencent-captcha
 TENCENT_TRIGGER_SELECTOR=#open-captcha
 TENCENT_SUCCESS_SELECTOR=.verification-success
 ```
@@ -192,7 +131,6 @@ The browser and API task use the same proxy.
 python -m pip install ruff
 ruff check .
 ruff format --check .
-python -m unittest discover -s tests -v
 ```
 
 ## Documentation
