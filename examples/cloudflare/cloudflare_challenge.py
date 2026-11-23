@@ -4,10 +4,11 @@ import os
 import time
 
 from captcha_solver_api.tasks import TurnstileTaskProxyless
-from common import create_client, logged_example, required_env, show_success
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
+
+from examples.common import create_client, logged_example, required_env, show_success
 
 URL = required_env("TARGET_URL")
 BROWSER_USER_AGENT = os.getenv("BROWSER_USER_AGENT") or (

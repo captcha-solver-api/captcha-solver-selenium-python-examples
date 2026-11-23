@@ -4,11 +4,12 @@ import os
 import time
 
 from captcha_solver_api.tasks import TencentTaskProxyless
-from common import create_client, logged_example, required_env, wait_for_css
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
+
+from examples.common import create_client, logged_example, required_env, wait_for_css
 
 TENCENT_INTERCEPT_SCRIPT = r"""
 (() => {

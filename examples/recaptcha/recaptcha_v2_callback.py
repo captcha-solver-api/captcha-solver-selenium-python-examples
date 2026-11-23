@@ -3,8 +3,15 @@
 import time
 
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
-from common import create_client, logged_example, required_env, show_success, wait_for_xpath
 from seleniumbase import Driver
+
+from examples.common import (
+    create_client,
+    logged_example,
+    required_env,
+    show_success,
+    wait_for_xpath,
+)
 
 URL = required_env("TARGET_URL")
 SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"

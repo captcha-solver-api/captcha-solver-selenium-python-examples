@@ -3,17 +3,18 @@
 import os
 
 from captcha_solver_api.tasks import YandexSmartCaptchaTaskProxyless
-from common import (
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from seleniumbase import Driver
+
+from examples.common import (
     create_client,
     fill_response_field,
     logged_example,
     wait_for_css,
     wait_for_xpath,
 )
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from seleniumbase import Driver
 
 URL = os.getenv("TARGET_URL") or "https://captcha-api.yandex.ru/demo"
 SITEKEY_SELECTOR = ".smart-captcha[data-sitekey]"

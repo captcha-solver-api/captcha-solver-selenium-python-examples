@@ -5,7 +5,10 @@ import struct
 import time
 
 from captcha_solver_api.tasks import CoordinatesTask
-from common import (
+from selenium.webdriver import ActionChains
+from seleniumbase import Driver
+
+from examples.common import (
     create_client,
     logged_example,
     required_env,
@@ -13,8 +16,6 @@ from common import (
     wait_for_css,
     wait_for_xpath,
 )
-from selenium.webdriver import ActionChains
-from seleniumbase import Driver
 
 URL = required_env("TARGET_URL")
 IMAGE_SELECTOR = "img[alt='clickcaptcha example']"

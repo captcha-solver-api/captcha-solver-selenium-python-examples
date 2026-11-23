@@ -3,9 +3,16 @@
 import time
 
 from captcha_solver_api.tasks import RecaptchaV3TaskProxyless
-from common import create_client, logged_example, required_env, show_success, wait_for_xpath
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
+
+from examples.common import (
+    create_client,
+    logged_example,
+    required_env,
+    show_success,
+    wait_for_xpath,
+)
 
 URL = required_env("TARGET_URL")
 SUBMIT_LOCATOR = "//button[@type='submit']"

@@ -1,10 +1,17 @@
-"""Solve the demo image captcha with additional recognition hints."""
+"""Screenshot an image captcha, solve it, and fill its answer field."""
 
 import time
 
 from captcha_solver_api.tasks import ImageToTextTask
-from common import create_client, logged_example, required_env, show_success, wait_for_xpath
 from seleniumbase import Driver
+
+from examples.common import (
+    create_client,
+    logged_example,
+    required_env,
+    show_success,
+    wait_for_xpath,
+)
 
 URL = required_env("TARGET_URL")
 IMAGE_LOCATOR = "//img[contains(@class,'captchaImage')]"
@@ -16,19 +23,12 @@ SUBMIT_LOCATOR = "//button[@type='submit']"
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
-        # STEP-02: Open the page and capture the CAPTCHA image as Base64.
+        # STEP-02: Open the page and capture only the CAPTCHA image as Base64.
         driver.get(URL)
-        image = wait_for_xpath(driver, IMAGE_LOCATOR).screenshot_as_base64
-        # STEP-03: Add recognition hints when constructing the image task.
-        solution = client.solve(
-            ImageToTextTask(
-                body=image,
-                numeric=4,
-                minLength=4,
-                maxLength=10,
-            )
-        )
-        # STEP-04: Fill and submit the recognized answer.
+        captcha = wait_for_xpath(driver, IMAGE_LOCATOR)
+        # STEP-03: Create the image task and wait for recognized text.
+        solution = client.solve(ImageToTextTask(body=captcha.screenshot_as_base64))
+        # STEP-04: Enter the returned text and submit this demo's form.
         wait_for_xpath(driver, ANSWER_LOCATOR).send_keys(solution["text"])
         print("Entered the answer to the captcha")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()

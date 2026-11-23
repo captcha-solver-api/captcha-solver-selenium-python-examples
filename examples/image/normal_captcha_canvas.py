@@ -3,7 +3,9 @@
 import time
 
 from captcha_solver_api.tasks import ImageToTextTask
-from common import (
+from seleniumbase import Driver
+
+from examples.common import (
     create_client,
     logged_example,
     required_env,
@@ -11,7 +13,6 @@ from common import (
     wait_for_css,
     wait_for_xpath,
 )
-from seleniumbase import Driver
 
 URL = required_env("TARGET_URL")
 IMAGE_SELECTOR = "img[class*='captchaImage']"

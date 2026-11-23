@@ -47,7 +47,7 @@ CAPTCHA_API_KEY=your_api_key
 ## Run
 
 ```bash
-python examples/recaptcha_v2.py
+python -m examples.recaptcha.recaptcha_v2
 ```
 
 The reCAPTCHA v2 example uses the official Google demo by default, and the
@@ -59,28 +59,28 @@ authorized to test.
 
 | Captcha | File |
 |---|---|
-| reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha_v2.py) |
-| reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha_v2_proxy.py) |
-| reCAPTCHA v2 callback | [`recaptcha_v2_callback_variant1.py`](examples/recaptcha_v2_callback_variant1.py) |
-| reCAPTCHA v2 callback, automatic discovery | [`recaptcha_v2_callback_variant2.py`](examples/recaptcha_v2_callback_variant2.py) |
-| reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha_v2_callback_proxy.py) |
-| reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha_v3.py) |
-| reCAPTCHA v3 interception | [`recaptcha_v3_extended_js_script.py`](examples/recaptcha_v3_extended_js_script.py) |
-| Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare_turnstile.py) |
-| Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare_challenge_page.py) |
-| Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) |
-| Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex_smartcaptcha.py) |
-| Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/normal_captcha_screenshot.py) |
-| Image captcha, canvas | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) |
-| Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/normal_captcha_screenshot_params.py) |
-| Coordinates | [`coordinates.py`](examples/coordinates.py) |
+| reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha/recaptcha_v2.py) |
+| reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha/recaptcha_v2_proxy.py) |
+| reCAPTCHA v2 callback | [`recaptcha_v2_callback_variant1.py`](examples/recaptcha/recaptcha_v2_callback_variant1.py) |
+| reCAPTCHA v2 callback, automatic discovery | [`recaptcha_v2_callback_variant2.py`](examples/recaptcha/recaptcha_v2_callback_variant2.py) |
+| reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
+| reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
+| reCAPTCHA v3 interception | [`recaptcha_v3_extended_js_script.py`](examples/recaptcha/recaptcha_v3_extended_js_script.py) |
+| Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare/cloudflare_turnstile.py) |
+| Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
+| Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
+| Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
+| Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/image/normal_captcha_screenshot.py) |
+| Image captcha, canvas | [`normal_captcha_canvas.py`](examples/image/normal_captcha_canvas.py) |
+| Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/image/normal_captcha_screenshot_params.py) |
+| Coordinates | [`coordinates.py`](examples/coordinates/coordinates.py) |
 
 ## Yandex SmartCaptcha
 
 After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 
 ```bash
-python examples/yandex_smartcaptcha.py
+python -m examples.yandex.yandex_smartcaptcha
 ```
 
 Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.

@@ -4,14 +4,15 @@ import os
 import time
 
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
-from common import (
+from seleniumbase import Driver
+
+from examples.common import (
     create_client,
     fill_response_field,
     logged_example,
     wait_for_css,
     wait_for_xpath,
 )
-from seleniumbase import Driver
 
 URL = os.getenv("TARGET_URL") or "https://www.google.com/recaptcha/api2/demo"
 SITEKEY_LOCATOR = "//*[@data-sitekey]"

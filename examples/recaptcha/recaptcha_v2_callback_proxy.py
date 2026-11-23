@@ -3,7 +3,10 @@
 import time
 
 from captcha_solver_api.tasks import RecaptchaV2Task
-from common import (
+from selenium.common.exceptions import TimeoutException
+from seleniumbase import Driver
+
+from examples.common import (
     create_client,
     logged_example,
     proxy_settings,
@@ -12,8 +15,6 @@ from common import (
     show_success,
     wait_for_xpath,
 )
-from selenium.common.exceptions import TimeoutException
-from seleniumbase import Driver
 
 URL = required_env("TARGET_URL")
 SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
