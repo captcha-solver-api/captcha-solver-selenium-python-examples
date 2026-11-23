@@ -32,11 +32,15 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(REPOSITORY_ROOT / ".env")
 
 
+class ConfigurationError(RuntimeError):
+    """Report missing local settings without a noisy Python traceback."""
+
+
 def required_env(name: str) -> str:
     """Return a required environment value or explain how to configure it."""
     value = os.getenv(name)
     if not value:
-        raise RuntimeError(f"Set {name} in the environment or .env file")
+        raise ConfigurationError(f"Set {name} in the environment or .env file")
     return value
 
 
@@ -50,9 +54,8 @@ def wait_for_xpath(driver, locator: str, timeout: int = 30):
     return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
 
 
-def show_success(driver) -> None:
+def show_success(driver, expected_text: str) -> None:
     """Require the exact target-specific success text configured by the user."""
-    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
     WebDriverWait(driver, 30).until(
         EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
     )
@@ -75,9 +78,23 @@ def fill_response_field(driver, field_name: str, token: str) -> None:
     )
 
 
-URL = os.getenv("RECAPTCHA_V2_TARGET_URL") or "https://www.google.com/recaptcha/api2/demo"
+DEFAULT_URL = "https://www.google.com/recaptcha/api2/demo"
+DEFAULT_SUCCESS_TEXT = "Verification Success... Hooray!"
+URL = os.getenv("RECAPTCHA_V2_TARGET_URL") or DEFAULT_URL
 SITEKEY_LOCATOR = "//*[@data-sitekey]"
 SUBMIT_LOCATOR = "//*[@type='submit']"
+
+
+def success_text() -> str:
+    """Use the known demo result or require an explicit custom-page signal."""
+    configured_text = os.getenv("CAPTCHA_SUCCESS_TEXT")
+    if configured_text:
+        return configured_text
+    if URL == DEFAULT_URL:
+        return DEFAULT_SUCCESS_TEXT
+    raise ConfigurationError(
+        "Set CAPTCHA_SUCCESS_TEXT for the custom RECAPTCHA_V2_TARGET_URL in .env"
+    )
 
 
 def main() -> None:
@@ -86,6 +103,9 @@ def main() -> None:
         "\n[STEP-01] Start the browser and SDK client; the client reads CAPTCHA_API_KEY.",
         flush=True,
     )
+    expected_success_text = success_text()
+    print(f"Target URL: {URL}", flush=True)
+    print(f"Expected success text: {expected_success_text}", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the page and extract the site key rendered by its widget.
         print(
@@ -125,8 +145,11 @@ def main() -> None:
             "\n[STEP-05] Require the page's success message; receiving a token is not acceptance.",
             flush=True,
         )
-        show_success(driver)
+        show_success(driver, expected_success_text)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except ConfigurationError as error:
+        raise SystemExit(f"\nConfiguration error: {error}") from None

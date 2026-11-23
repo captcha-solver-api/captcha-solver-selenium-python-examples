@@ -64,6 +64,13 @@ class ExampleStructureTests(unittest.TestCase):
                 self.assertIn("debug=True", source)
                 self.assertNotIn('print("Solution:", solution)', source)
 
+    def test_recaptcha_v2_default_has_known_success_signal(self):
+        source = (EXAMPLES / "recaptcha" / "recaptcha_v2.py").read_text(encoding="utf-8")
+        self.assertIn('DEFAULT_SUCCESS_TEXT = "Verification Success... Hooray!"', source)
+        self.assertIn("expected_success_text = success_text()", source)
+        self.assertIn("show_success(driver, expected_success_text)", source)
+        self.assertIn('raise SystemExit(f"\\nConfiguration error: {error}") from None', source)
+
     def test_browser_examples_explain_adaptation(self):
         for path in self.example_files():
             source = path.read_text(encoding="utf-8")
