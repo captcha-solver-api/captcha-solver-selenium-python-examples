@@ -1,28 +1,114 @@
 """Solve Tencent CAPTCHA on a user-configured page.
 
 What it does:
-    Installs an interceptor before TARGET_URL loads, captures Tencent constructor parameters,
+    Installs an interceptor before TENCENT_TARGET_URL loads, captures Tencent constructor parameters,
     solves TencentTaskProxyless, delivers ticket/randstr to the original callback, and checks the
     target-specific success element.
 
+To use this example on another page, change its type-specific target URL and inspect the
+site key or challenge parameters, solution fields or callbacks, submission controls, and exact success
+signal before applying the result.
+
 How it works:
-    STEP-01 loads configuration. STEP-02 installs interception. STEP-03 captures parameters.
-    STEP-04 solves the task. STEP-05 invokes the callback. STEP-06 checks the page signal.
+    STEP-01 - loads configuration.
+    STEP-02 - installs interception.
+    STEP-03 - captures parameters.
+    STEP-04 - solves the task.
+    STEP-05 - invokes the callback.
+    STEP-06 - checks the page signal.
 """
 
 import os
-import time
+from pathlib import Path
 
+from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import TencentTaskProxyless
+from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import create_client, logged_example, required_env, wait_for_css
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPOSITORY_ROOT / ".env")
+
+
+def required_env(name: str) -> str:
+    """Return a required environment value or explain how to configure it."""
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Set {name} in the environment or .env file")
+    return value
+
+
+def create_client() -> CaptchaClient:
+    """Create the SDK client with CAPTCHA_API_KEY."""
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+
+
+def wait_for_css(driver, selector: str, timeout: int = 30):
+    """Wait until a target-specific CSS selector exists."""
+    return WebDriverWait(driver, timeout).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+    )
+
+
+def wait_for_xpath(driver, locator: str, timeout: int = 30):
+    """Wait until a target-specific XPath is visible and enabled."""
+    return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
+
+
+def show_success(driver) -> None:
+    """Require the exact target-specific success text configured by the user."""
+    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
+    WebDriverWait(driver, 30).until(
+        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
+    )
+    print(f"Page confirmation: {expected_text}")
+
+
+def proxy_settings() -> dict:
+    """Build the SDK proxy options from the same values used by the browser."""
+    return {
+        "proxyType": required_env("PROXY_TYPE"),
+        "proxyAddress": required_env("PROXY_ADDRESS"),
+        "proxyPort": int(required_env("PROXY_PORT")),
+        "proxyLogin": os.getenv("PROXY_LOGIN"),
+        "proxyPassword": os.getenv("PROXY_PASSWORD"),
+    }
+
+
+def selenium_proxy() -> str:
+    """Build SeleniumBase's proxy string from the configured proxy options."""
+    settings = proxy_settings()
+    address = settings["proxyAddress"]
+    port = settings["proxyPort"]
+    login = settings["proxyLogin"]
+    password = settings["proxyPassword"]
+    if login and password:
+        return f"{login}:{password}@{address}:{port}"
+    return f"{address}:{port}"
+
+
+def fill_response_field(driver, field_name: str, token: str) -> None:
+    """Set a target-specific response field and dispatch its input/change events."""
+    driver.execute_script(
+        """
+        const field = document.querySelector(`[name="${arguments[0]}"]`);
+        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
+        field.value = arguments[1];
+        field.innerHTML = arguments[1];
+        field.dispatchEvent(new Event('input', {bubbles: true}));
+        field.dispatchEvent(new Event('change', {bubbles: true}));
+        """,
+        field_name,
+        token,
+    )
+
 
 TENCENT_INTERCEPT_SCRIPT = r"""
 (() => {
+  const CALLBACK_OR_OPTIONS_INDEX = 1;
   const records = new Map();
   const wrappers = new WeakMap();
   let constructor;
@@ -33,9 +119,10 @@ TENCENT_INTERCEPT_SCRIPT = r"""
     if (wrappers.has(Original)) return wrappers.get(Original);
     const Wrapped = new Proxy(Original, {
       construct(Target, args, newTarget) {
-        const offset = typeof args[1] === 'function' ? 0 : 1;
-        const appId = args[offset];
-        const callback = args[offset + 1];
+        const appIdIndex = typeof args[CALLBACK_OR_OPTIONS_INDEX] === 'function' ? 0 : 1;
+        const callbackIndex = appIdIndex + 1;
+        const appId = args[appIdIndex];
+        const callback = args[callbackIndex];
         if (!appId || typeof callback !== 'function') {
           return Reflect.construct(Target, args, newTarget);
         }
@@ -49,7 +136,7 @@ TENCENT_INTERCEPT_SCRIPT = r"""
             .find(src => /\/TCaptcha-global\.js(?:\?|$)/i.test(src))
         };
         const nativeArgs = [...args];
-        nativeArgs[offset + 1] = () => {};
+        nativeArgs[callbackIndex] = () => {};
         const instance = Reflect.construct(Target, nativeArgs, newTarget);
         instance.show = () => {};
         records.set(id, {params, callback, submitted: false});
@@ -85,10 +172,9 @@ TENCENT_INTERCEPT_SCRIPT = r"""
 """
 
 
-@logged_example
 def main() -> None:
     # STEP-01: Read target-specific configuration and start the browser/client.
-    target_url = required_env("TARGET_URL")
+    target_url = required_env("TENCENT_TARGET_URL")
     success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
@@ -114,6 +200,7 @@ def main() -> None:
         # STEP-04: Create the proxyless task and wait for ticket/randstr.
         task = TencentTaskProxyless(**params)
         solution = client.solve(task)
+        print("Solution:", solution)
         # STEP-05: Deliver the result to the original page callback.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
@@ -125,7 +212,6 @@ def main() -> None:
         message = wait_for_css(driver, success_selector)
         WebDriverWait(driver, 30).until(EC.visibility_of(message))
         print(message.text)
-        time.sleep(5)
 
 
 if __name__ == "__main__":

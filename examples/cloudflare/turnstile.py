@@ -1,34 +1,114 @@
 """Solve a standalone Cloudflare Turnstile widget.
 
 What it does:
-    Extracts the widget site key from TARGET_URL, solves TurnstileTaskProxyless, inserts the
+    Extracts the widget site key from TURNSTILE_TARGET_URL, solves TurnstileTaskProxyless, inserts the
     returned token into the page response field, submits the form, and checks acceptance.
 
+To use this example on another page, change its type-specific target URL and inspect the
+site key or challenge parameters, solution fields or callbacks, submission controls, and exact success
+signal before applying the result.
+
 How it works:
-    STEP-01 starts browser/client. STEP-02 extracts the site key. STEP-03 solves the SDK task.
-    STEP-04 submits the token. STEP-05 requires the page's success message.
+    STEP-01 - starts browser/client.
+    STEP-02 - extracts the site key.
+    STEP-03 - solves the SDK task.
+    STEP-04 - submits the token.
+    STEP-05 - requires the page's success message.
 """
 
-import time
+import os
+from pathlib import Path
 
+from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import TurnstileTaskProxyless
+from dotenv import load_dotenv
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import (
-    create_client,
-    fill_response_field,
-    logged_example,
-    required_env,
-    show_success,
-    wait_for_xpath,
-)
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPOSITORY_ROOT / ".env")
 
-URL = required_env("TARGET_URL")
+
+def required_env(name: str) -> str:
+    """Return a required environment value or explain how to configure it."""
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Set {name} in the environment or .env file")
+    return value
+
+
+def create_client() -> CaptchaClient:
+    """Create the SDK client with CAPTCHA_API_KEY."""
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+
+
+def wait_for_css(driver, selector: str, timeout: int = 30):
+    """Wait until a target-specific CSS selector exists."""
+    return WebDriverWait(driver, timeout).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+    )
+
+
+def wait_for_xpath(driver, locator: str, timeout: int = 30):
+    """Wait until a target-specific XPath is visible and enabled."""
+    return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
+
+
+def show_success(driver) -> None:
+    """Require the exact target-specific success text configured by the user."""
+    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
+    WebDriverWait(driver, 30).until(
+        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
+    )
+    print(f"Page confirmation: {expected_text}")
+
+
+def proxy_settings() -> dict:
+    """Build the SDK proxy options from the same values used by the browser."""
+    return {
+        "proxyType": required_env("PROXY_TYPE"),
+        "proxyAddress": required_env("PROXY_ADDRESS"),
+        "proxyPort": int(required_env("PROXY_PORT")),
+        "proxyLogin": os.getenv("PROXY_LOGIN"),
+        "proxyPassword": os.getenv("PROXY_PASSWORD"),
+    }
+
+
+def selenium_proxy() -> str:
+    """Build SeleniumBase's proxy string from the configured proxy options."""
+    settings = proxy_settings()
+    address = settings["proxyAddress"]
+    port = settings["proxyPort"]
+    login = settings["proxyLogin"]
+    password = settings["proxyPassword"]
+    if login and password:
+        return f"{login}:{password}@{address}:{port}"
+    return f"{address}:{port}"
+
+
+def fill_response_field(driver, field_name: str, token: str) -> None:
+    """Set a target-specific response field and dispatch its input/change events."""
+    driver.execute_script(
+        """
+        const field = document.querySelector(`[name="${arguments[0]}"]`);
+        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
+        field.value = arguments[1];
+        field.innerHTML = arguments[1];
+        field.dispatchEvent(new Event('input', {bubbles: true}));
+        field.dispatchEvent(new Event('change', {bubbles: true}));
+        """,
+        field_name,
+        token,
+    )
+
+
+URL = required_env("TURNSTILE_TARGET_URL")
 SITEKEY_LOCATOR = "//div[@id='cf-turnstile']"
 SUBMIT_LOCATOR = "//button[@type='submit']"
 
 
-@logged_example
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
@@ -43,6 +123,7 @@ def main() -> None:
         # STEP-03: Create and solve the proxyless Turnstile task.
         task = TurnstileTaskProxyless(websiteURL=URL, websiteKey=sitekey)
         solution = client.solve(task)
+        print("Solution:", solution)
         # STEP-04: Put the token into this demo's response field.
         # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "cf-turnstile-response", solution["token"])
@@ -51,7 +132,6 @@ def main() -> None:
         print("Pressed the Check button")
         # STEP-05: Require the page's success message after submission.
         show_success(driver)
-        time.sleep(5)
 
 
 if __name__ == "__main__":

@@ -1,35 +1,115 @@
 """Solve reCAPTCHA v2 in a SeleniumBase browser session.
 
 What it does:
-    Opens the official demo or TARGET_URL without a proxy, extracts the widget site key, solves
+    Opens the official demo or RECAPTCHA_V2_TARGET_URL without a proxy, extracts the widget site key, solves
     RecaptchaV2TaskProxyless, injects the token, submits the form, and checks page acceptance.
 
+To use this example on another page, change its type-specific target URL and inspect the
+site key or challenge parameters, solution fields or callbacks, submission controls, and exact success
+signal before applying the result.
+
 How it works:
-    STEP-01 starts the browser/client. STEP-02 reads the site key. STEP-03 creates and solves the
-    SDK task. STEP-04 submits the token. STEP-05 requires the page's success message.
+    STEP-01 - starts the browser/client.
+    STEP-02 - reads the site key.
+    STEP-03 - creates and solves the
+    SDK task.
+    STEP-04 - submits the token.
+    STEP-05 - requires the page's success message.
 """
 
 import os
-import time
+from pathlib import Path
 
+from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
+from dotenv import load_dotenv
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import (
-    create_client,
-    fill_response_field,
-    logged_example,
-    wait_for_css,
-    wait_for_xpath,
-)
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPOSITORY_ROOT / ".env")
 
-URL = os.getenv("TARGET_URL") or "https://www.google.com/recaptcha/api2/demo"
+
+def required_env(name: str) -> str:
+    """Return a required environment value or explain how to configure it."""
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Set {name} in the environment or .env file")
+    return value
+
+
+def create_client() -> CaptchaClient:
+    """Create the SDK client with CAPTCHA_API_KEY."""
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+
+
+def wait_for_css(driver, selector: str, timeout: int = 30):
+    """Wait until a target-specific CSS selector exists."""
+    return WebDriverWait(driver, timeout).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+    )
+
+
+def wait_for_xpath(driver, locator: str, timeout: int = 30):
+    """Wait until a target-specific XPath is visible and enabled."""
+    return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
+
+
+def show_success(driver) -> None:
+    """Require the exact target-specific success text configured by the user."""
+    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
+    WebDriverWait(driver, 30).until(
+        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
+    )
+    print(f"Page confirmation: {expected_text}")
+
+
+def proxy_settings() -> dict:
+    """Build the SDK proxy options from the same values used by the browser."""
+    return {
+        "proxyType": required_env("PROXY_TYPE"),
+        "proxyAddress": required_env("PROXY_ADDRESS"),
+        "proxyPort": int(required_env("PROXY_PORT")),
+        "proxyLogin": os.getenv("PROXY_LOGIN"),
+        "proxyPassword": os.getenv("PROXY_PASSWORD"),
+    }
+
+
+def selenium_proxy() -> str:
+    """Build SeleniumBase's proxy string from the configured proxy options."""
+    settings = proxy_settings()
+    address = settings["proxyAddress"]
+    port = settings["proxyPort"]
+    login = settings["proxyLogin"]
+    password = settings["proxyPassword"]
+    if login and password:
+        return f"{login}:{password}@{address}:{port}"
+    return f"{address}:{port}"
+
+
+def fill_response_field(driver, field_name: str, token: str) -> None:
+    """Set a target-specific response field and dispatch its input/change events."""
+    driver.execute_script(
+        """
+        const field = document.querySelector(`[name="${arguments[0]}"]`);
+        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
+        field.value = arguments[1];
+        field.innerHTML = arguments[1];
+        field.dispatchEvent(new Event('input', {bubbles: true}));
+        field.dispatchEvent(new Event('change', {bubbles: true}));
+        """,
+        field_name,
+        token,
+    )
+
+
+URL = os.getenv("RECAPTCHA_V2_TARGET_URL") or "https://www.google.com/recaptcha/api2/demo"
 SITEKEY_LOCATOR = "//*[@data-sitekey]"
 SUBMIT_LOCATOR = "//*[@type='submit']"
-SUCCESS_SELECTOR = ".recaptcha-success, p.successMessage"
 
 
-@logged_example
 def main() -> None:
     # STEP-01: Start the browser and SDK client; the client reads CAPTCHA_API_KEY.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
@@ -48,6 +128,7 @@ def main() -> None:
             userAgent=driver.execute_script("return navigator.userAgent"),
         )
         solution = client.solve(task)
+        print("Solution:", solution)
         # STEP-04: Apply the token using this page's response field and submit the form.
         # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "g-recaptcha-response", solution["gRecaptchaResponse"])
@@ -55,8 +136,7 @@ def main() -> None:
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
         # STEP-05: Require the page's success message; receiving a token is not acceptance.
-        print(wait_for_css(driver, SUCCESS_SELECTOR).text)
-        time.sleep(5)
+        show_success(driver)
 
 
 if __name__ == "__main__":

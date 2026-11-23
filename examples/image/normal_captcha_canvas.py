@@ -1,29 +1,110 @@
 """Extract an image CAPTCHA through canvas and submit its solution.
 
 What it does:
-    Copies rendered CAPTCHA pixels from TARGET_URL into a canvas, solves ImageToTextTask without
+    Copies rendered CAPTCHA pixels from IMAGE_CAPTCHA_TARGET_URL into a canvas, solves ImageToTextTask without
     a proxy, fills the recognized text, submits the form, and checks acceptance.
 
+To use this example on another page, change its type-specific target URL and inspect the
+site key or challenge parameters, solution fields or callbacks, submission controls, and exact success
+signal before applying the result.
+
 How it works:
-    STEP-01 starts browser/client. STEP-02 extracts Base64 pixels. STEP-03 solves the image task.
-    STEP-04 enters/submits the text. STEP-05 checks the page result.
+    STEP-01 - starts browser/client.
+    STEP-02 - extracts Base64 pixels.
+    STEP-03 - solves the image task.
+    STEP-04 - enters/submits the text.
+    STEP-05 - checks the page result.
 """
 
-import time
+import os
+from pathlib import Path
 
+from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import ImageToTextTask
+from dotenv import load_dotenv
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import (
-    create_client,
-    logged_example,
-    required_env,
-    show_success,
-    wait_for_css,
-    wait_for_xpath,
-)
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPOSITORY_ROOT / ".env")
 
-URL = required_env("TARGET_URL")
+
+def required_env(name: str) -> str:
+    """Return a required environment value or explain how to configure it."""
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Set {name} in the environment or .env file")
+    return value
+
+
+def create_client() -> CaptchaClient:
+    """Create the SDK client with CAPTCHA_API_KEY."""
+    return CaptchaClient(required_env("CAPTCHA_API_KEY"))
+
+
+def wait_for_css(driver, selector: str, timeout: int = 30):
+    """Wait until a target-specific CSS selector exists."""
+    return WebDriverWait(driver, timeout).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+    )
+
+
+def wait_for_xpath(driver, locator: str, timeout: int = 30):
+    """Wait until a target-specific XPath is visible and enabled."""
+    return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
+
+
+def show_success(driver) -> None:
+    """Require the exact target-specific success text configured by the user."""
+    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
+    WebDriverWait(driver, 30).until(
+        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
+    )
+    print(f"Page confirmation: {expected_text}")
+
+
+def proxy_settings() -> dict:
+    """Build the SDK proxy options from the same values used by the browser."""
+    return {
+        "proxyType": required_env("PROXY_TYPE"),
+        "proxyAddress": required_env("PROXY_ADDRESS"),
+        "proxyPort": int(required_env("PROXY_PORT")),
+        "proxyLogin": os.getenv("PROXY_LOGIN"),
+        "proxyPassword": os.getenv("PROXY_PASSWORD"),
+    }
+
+
+def selenium_proxy() -> str:
+    """Build SeleniumBase's proxy string from the configured proxy options."""
+    settings = proxy_settings()
+    address = settings["proxyAddress"]
+    port = settings["proxyPort"]
+    login = settings["proxyLogin"]
+    password = settings["proxyPassword"]
+    if login and password:
+        return f"{login}:{password}@{address}:{port}"
+    return f"{address}:{port}"
+
+
+def fill_response_field(driver, field_name: str, token: str) -> None:
+    """Set a target-specific response field and dispatch its input/change events."""
+    driver.execute_script(
+        """
+        const field = document.querySelector(`[name="${arguments[0]}"]`);
+        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
+        field.value = arguments[1];
+        field.innerHTML = arguments[1];
+        field.dispatchEvent(new Event('input', {bubbles: true}));
+        field.dispatchEvent(new Event('change', {bubbles: true}));
+        """,
+        field_name,
+        token,
+    )
+
+
+URL = required_env("IMAGE_CAPTCHA_TARGET_URL")
 IMAGE_SELECTOR = "img[class*='captchaImage']"
 ANSWER_LOCATOR = "//input[@id='simple-captcha-field']"
 SUBMIT_LOCATOR = "//button[@type='submit']"
@@ -38,7 +119,6 @@ return canvas.toDataURL('image/png').split(',', 2)[1];
 """
 
 
-@logged_example
 def main() -> None:
     # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
@@ -49,6 +129,7 @@ def main() -> None:
         # STEP-03: Create the image task and wait for recognized text.
         task = ImageToTextTask(body=image)
         solution = client.solve(task)
+        print("Recognized text:", solution["text"])
         # STEP-04: Fill and submit the answer using this demo's controls.
         wait_for_xpath(driver, ANSWER_LOCATOR).send_keys(solution["text"])
         print("Entered the answer to the captcha")
@@ -56,7 +137,6 @@ def main() -> None:
         print("Pressed the Check button")
         # STEP-05: Verify the page accepted the submitted answer.
         show_success(driver)
-        time.sleep(5)
 
 
 if __name__ == "__main__":

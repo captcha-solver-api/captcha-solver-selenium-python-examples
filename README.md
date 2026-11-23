@@ -55,9 +55,15 @@ python -m examples.recaptcha.recaptcha_v2
 ```
 
 The reCAPTCHA v2 example uses the official Google demo by default, and the
-Yandex SmartCaptcha example uses the official Yandex demo. Set
-`TARGET_URL` in `.env` to run another example against a page you are
-authorized to test.
+Yandex SmartCaptcha example uses the official Yandex demo. Other browser examples use the
+type-specific target variables from `.env.example`; replace their `example.com` placeholders
+with pages you are authorized to test. Set `CAPTCHA_SUCCESS_TEXT` to the exact confirmation text
+returned by that target page.
+
+> [!IMPORTANT]
+> Browser and local examples create paid solving tasks. A solution returned by the SDK proves
+> only that the service completed the task. Browser examples separately verify the configured
+> page signal; local image examples cannot prove page acceptance.
 
 ## Examples
 
@@ -93,14 +99,14 @@ After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 python -m examples.yandex.yandex_smartcaptcha
 ```
 
-Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
+Leave `YANDEX_SMARTCAPTCHA_TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
 The example reads the widget's `data-sitekey` and the browser's User-Agent,
 requests a token using `YandexSmartCaptchaTaskProxyless`, fills `smart-token`,
 and submits the form. It reports success only after the page returns
 `Hello, user!`.
 
-The example uses the same `.env` configuration, shared API client, and
-console logging as the other examples. Running it creates a paid solving task.
+The example loads the same `.env` template as the other examples but keeps client creation,
+parameter extraction, task construction, submission, and verification in its own file.
 
 Two image-based examples use captured assets and do not open a browser:
 
@@ -130,7 +136,7 @@ python -m examples.image.image_to_text_local
 python -m examples.coordinates.coordinates_local
 ```
 
-To adapt it to a page you are authorized to test, set `TARGET_URL` and update
+To adapt it to a page you are authorized to test, set `YANDEX_SMARTCAPTCHA_TARGET_URL` and update
 `SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.
 If your application uses a callback instead of reading `smart-token`, adapt
 the token delivery to that callback as well.
@@ -143,7 +149,7 @@ the token delivery to that callback as well.
 Tencent requires your own target page and selectors:
 
 ```dotenv
-TARGET_URL=https://your-site.example/tencent-captcha
+TENCENT_TARGET_URL=https://example.com/page_with_tencent_captcha
 TENCENT_TRIGGER_SELECTOR=#open-captcha
 TENCENT_SUCCESS_SELECTOR=.verification-success
 ```
@@ -169,6 +175,7 @@ The browser and API task use the same proxy.
 python -m pip install ruff
 ruff check .
 ruff format --check .
+python -m unittest discover -s tests -v
 ```
 
 ## Documentation
