@@ -23,6 +23,7 @@ from pathlib import Path
 from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
 from dotenv import load_dotenv
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -34,6 +35,10 @@ load_dotenv(REPOSITORY_ROOT / ".env")
 
 class ConfigurationError(RuntimeError):
     """Report missing local settings without a noisy Python traceback."""
+
+
+class AcceptanceError(RuntimeError):
+    """Report that the target page did not confirm the submitted solution."""
 
 
 def required_env(name: str) -> str:
@@ -54,12 +59,29 @@ def wait_for_xpath(driver, locator: str, timeout: int = 30):
     return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
 
 
-def show_success(driver, expected_text: str) -> None:
-    """Require the exact target-specific success text configured by the user."""
-    WebDriverWait(driver, 30).until(
-        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
-    )
-    print(f"Page confirmation: {expected_text}")
+def show_success(driver, expected_text: str | None) -> None:
+    """Require the demo marker or the custom target's configured success text."""
+    try:
+        if URL == DEFAULT_URL:
+            confirmation = WebDriverWait(driver, 30).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, ".recaptcha-success"))
+            )
+            message = confirmation.text.strip()
+            if not message:
+                raise AcceptanceError("Google demo returned an empty success message")
+        else:
+            WebDriverWait(driver, 30).until(
+                EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
+            )
+            message = expected_text
+    except TimeoutException as error:
+        body_text = " ".join(driver.find_element(By.TAG_NAME, "body").text.split())
+        page_excerpt = body_text[:300] or "<empty page body>"
+        raise AcceptanceError(
+            f"the page did not confirm token acceptance. URL: {driver.current_url}. "
+            f"Page text: {page_excerpt}"
+        ) from error
+    print(f"Page confirmation: {message}", flush=True)
 
 
 def fill_response_field(driver, field_name: str, token: str) -> None:
@@ -79,19 +101,18 @@ def fill_response_field(driver, field_name: str, token: str) -> None:
 
 
 DEFAULT_URL = "https://www.google.com/recaptcha/api2/demo"
-DEFAULT_SUCCESS_TEXT = "Verification Success... Hooray!"
 URL = os.getenv("RECAPTCHA_V2_TARGET_URL") or DEFAULT_URL
 SITEKEY_LOCATOR = "//*[@data-sitekey]"
-SUBMIT_LOCATOR = "//*[@type='submit']"
+SUBMIT_LOCATOR = "#recaptcha-demo-submit" if URL == DEFAULT_URL else "[type='submit']"
 
 
-def success_text() -> str:
-    """Use the known demo result or require an explicit custom-page signal."""
+def success_text() -> str | None:
+    """Use the demo's stable marker or require an explicit custom-page signal."""
+    if URL == DEFAULT_URL:
+        return None
     configured_text = os.getenv("CAPTCHA_SUCCESS_TEXT")
     if configured_text:
         return configured_text
-    if URL == DEFAULT_URL:
-        return DEFAULT_SUCCESS_TEXT
     raise ConfigurationError(
         "Set CAPTCHA_SUCCESS_TEXT for the custom RECAPTCHA_V2_TARGET_URL in .env"
     )
@@ -105,7 +126,8 @@ def main() -> None:
     )
     expected_success_text = success_text()
     print(f"Target URL: {URL}", flush=True)
-    print(f"Expected success text: {expected_success_text}", flush=True)
+    success_signal = ".recaptcha-success" if URL == DEFAULT_URL else expected_success_text
+    print(f"Success signal: {success_signal}", flush=True)
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the page and extract the site key rendered by its widget.
         print(
@@ -138,7 +160,9 @@ def main() -> None:
         # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "g-recaptcha-response", solution["gRecaptchaResponse"])
         print("Token sent")
-        wait_for_xpath(driver, SUBMIT_LOCATOR).click()
+        WebDriverWait(driver, 30).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, SUBMIT_LOCATOR))
+        ).click()
         print("Pressed the Check button")
         # STEP-05: Require the page's success message; receiving a token is not acceptance.
         print(
@@ -153,3 +177,5 @@ if __name__ == "__main__":
         main()
     except ConfigurationError as error:
         raise SystemExit(f"\nConfiguration error: {error}") from None
+    except AcceptanceError as error:
+        raise SystemExit(f"\nVerification failed: {error}") from None
