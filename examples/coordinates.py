@@ -37,13 +37,18 @@ def png_size(png_base64: str):
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+        # STEP-02: Capture the source pixels and dimensions of the rendered click CAPTCHA.
         driver.get(URL)
         captcha = wait_for_css(driver, IMAGE_SELECTOR)
         image = driver.execute_script(CANVAS_SCRIPT, IMAGE_SELECTOR)
         image_width, image_height = png_size(image)
-        solution = client.solve(CoordinatesTask(body=image))
+        # STEP-03: Create the coordinate task and wait for image-space click points.
+        task = CoordinatesTask(body=image)
+        solution = client.solve(task)
 
+        # STEP-04: Scale source-image points to the displayed element before clicking.
         scale_x = captcha.size["width"] / image_width
         scale_y = captcha.size["height"] / image_height
         print(
@@ -67,6 +72,7 @@ def main() -> None:
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit)
         driver.execute_script("arguments[0].click();", submit)
         print("Pressed the Check button")
+        # STEP-05: Submit the clicks and require the page's success message.
         show_success(driver)
         time.sleep(5)
 

@@ -20,20 +20,23 @@ return match ? {sitekey: match[1], action: match[2]} : null;
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+        # STEP-02: Open the page and extract the key/action used by grecaptcha.execute().
         driver.get(URL)
         params = WebDriverWait(driver, 30).until(
             lambda current: current.execute_script(FIND_PARAMS)
         )
         print("Parameters sitekey and action received")
-        solution = client.solve(
-            RecaptchaV3TaskProxyless(
-                websiteURL=URL,
-                websiteKey=params["sitekey"],
-                minScore=0.3,
-                pageAction=params["action"],
-            )
+        # STEP-03: Create the score-based task and wait for its token.
+        task = RecaptchaV3TaskProxyless(
+            websiteURL=URL,
+            websiteKey=params["sitekey"],
+            minScore=0.3,
+            pageAction=params["action"],
         )
+        solution = client.solve(task)
+        # STEP-04: Apply the token using this target page's integration.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyRecaptcha(arguments[0]);",
@@ -42,6 +45,7 @@ def main() -> None:
         print("The token is sent")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
+        # STEP-05: Verify page acceptance independently of SDK completion.
         show_success(driver)
         time.sleep(5)
 

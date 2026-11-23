@@ -38,15 +38,18 @@ return null;
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+        # STEP-02: Open the page and inspect reCAPTCHA's runtime configuration.
         driver.get(URL)
         params = WebDriverWait(driver, 30).until(
             lambda current: current.execute_script(FIND_CLIENT)
         )
         print("Got the callback function name and site key")
-        solution = client.solve(
-            RecaptchaV2TaskProxyless(websiteURL=URL, websiteKey=params["sitekey"])
-        )
+        # STEP-03: Create and solve the task with the discovered site key.
+        task = RecaptchaV2TaskProxyless(websiteURL=URL, websiteKey=params["sitekey"])
+        solution = client.solve(task)
+        # STEP-04: Resolve the discovered callback and deliver the token to it.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
@@ -60,6 +63,7 @@ def main() -> None:
             solution["gRecaptchaResponse"],
         )
         print("The token is sent to the callback function")
+        # STEP-05: Require the demo page's explicit success message.
         show_success(driver)
         time.sleep(5)
 

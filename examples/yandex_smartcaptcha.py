@@ -23,8 +23,9 @@ SUCCESS_TEXT = "Hello, user!"
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
-        # Read the public widget key from the page opened in this browser.
+        # STEP-02: Read the public widget key from the page opened in this browser.
         driver.get(URL)
         widget = wait_for_css(driver, SITEKEY_SELECTOR)
         sitekey = widget.get_attribute("data-sitekey")
@@ -32,20 +33,18 @@ def main() -> None:
             raise RuntimeError("No Yandex SmartCaptcha sitekey found")
         print(f"Sitekey received: {sitekey}")
 
-        # The SDK creates the task and waits for its solution.
-        solution = client.solve(
-            YandexSmartCaptchaTaskProxyless(
-                websiteURL=driver.current_url,
-                websiteKey=sitekey,
-                userAgent=driver.execute_script("return navigator.userAgent"),
-            ),
-            timeout=180,
+        # STEP-03: Create the task; solve() submits it and waits for its solution.
+        task = YandexSmartCaptchaTaskProxyless(
+            websiteURL=driver.current_url,
+            websiteKey=sitekey,
+            userAgent=driver.execute_script("return navigator.userAgent"),
         )
+        solution = client.solve(task, timeout=180)
         token = solution.get("token")
         if not isinstance(token, str) or not token.strip():
             raise RuntimeError("Captcha Solver returned an empty SmartCaptcha token")
 
-        # Token injection and submission are site-specific; adapt this step to the target page.
+        # STEP-04: Token injection and submission are site-specific; adapt this step.
         # This demo submits the token through a hidden form field.
         wait_for_css(driver, 'input[name="smart-token"]')
         fill_response_field(driver, "smart-token", token)
@@ -53,7 +52,7 @@ def main() -> None:
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Submitted the form")
 
-        # Confirm acceptance by the site, not just receipt of an API token.
+        # STEP-05: Confirm acceptance by the site, not just receipt of an API token.
         WebDriverWait(driver, 30).until(
             EC.text_to_be_present_in_element((By.TAG_NAME, "body"), SUCCESS_TEXT)
         )

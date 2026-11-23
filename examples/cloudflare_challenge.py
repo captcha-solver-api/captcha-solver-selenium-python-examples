@@ -68,10 +68,12 @@ def capture_params(driver):
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start Chrome with the same User-Agent sent in the solver task.
     with (
         Driver(browser="chrome", headless=False, agent=BROWSER_USER_AGENT) as driver,
         create_client() as client,
     ):
+        # STEP-02: Install the interceptor before reloading the challenge page.
         driver.get(URL)
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
@@ -82,8 +84,11 @@ def main() -> None:
         if params is None:
             return
         print("Parameters received")
-        solution = client.solve(TurnstileTaskProxyless(**params))
+        # STEP-03: Build the task from captured render options and solve it.
+        task = TurnstileTaskProxyless(**params)
+        solution = client.solve(task)
 
+        # STEP-04: Deliver the token to the callback captured from this page.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             """
@@ -95,6 +100,7 @@ def main() -> None:
             solution["token"],
         )
         print("The token is sent to the callback function")
+        # STEP-05: Verify the page's explicit success signal after callback delivery.
         show_success(driver)
         time.sleep(10)
 

@@ -70,6 +70,8 @@ authorized to test.
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare_challenge_page.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) |
 | Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex_smartcaptcha.py) |
+| Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex_smartcaptcha_image.py) |
+| Yandex SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex_smartcaptcha_kaleidoscope.py) |
 | Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/normal_captcha_screenshot.py) |
 | Image captcha, canvas | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) |
 | Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/normal_captcha_screenshot_params.py) |
@@ -91,6 +93,18 @@ and submits the form. It reports success only after the page returns
 
 The example uses the same `.env` configuration, shared API client, and
 console logging as the other examples. Running it creates a paid solving task.
+
+Two image-based examples use captured assets and do not open a browser:
+
+```bash
+python examples/yandex_smartcaptcha_image.py
+python examples/yandex_smartcaptcha_kaleidoscope.py
+```
+
+The image example returns ordered points to click. The Kaleidoscope example
+returns the required number of slider-arrow clicks. These examples demonstrate
+task creation and result handling; applying a captured result and checking that
+a live page accepts it are necessarily site-specific.
 
 To adapt it to a page you are authorized to test, set `TARGET_URL` and update
 `SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.

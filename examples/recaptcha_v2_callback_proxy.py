@@ -21,10 +21,12 @@ SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start browser and SDK client with one shared proxy.
     with (
         Driver(browser="chrome", headless=False, cft=True, proxy=selenium_proxy()) as driver,
         create_client() as client,
     ):
+        # STEP-02: Open the page through the proxy and extract its site key.
         driver.get(URL)
         try:
             sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
@@ -34,20 +36,22 @@ def main() -> None:
                 "Check the proxy address, credentials, and availability."
             ) from exc
         print("Got the callback function name and site key")
-        solution = client.solve(
-            RecaptchaV2Task(
-                websiteURL=URL,
-                websiteKey=sitekey,
-                userAgent=driver.execute_script("return navigator.userAgent"),
-                **proxy_settings(),
-            )
+        # STEP-03: Create and solve the task through the same proxy.
+        task = RecaptchaV2Task(
+            websiteURL=URL,
+            websiteKey=sitekey,
+            userAgent=driver.execute_script("return navigator.userAgent"),
+            **proxy_settings(),
         )
+        solution = client.solve(task)
+        # STEP-04: Deliver the token to this demo's callback.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.verifyDemoRecaptcha(arguments[0]);",
             solution["gRecaptchaResponse"],
         )
         print("The token is sent to the callback function")
+        # STEP-05: Verify successful callback handling on the page.
         show_success(driver)
         time.sleep(5)
 

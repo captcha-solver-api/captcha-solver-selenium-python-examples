@@ -14,21 +14,25 @@ SUBMIT_LOCATOR = "//button[@type='submit']"
 
 @logged_example
 def main() -> None:
+    # STEP-01: Start the browser and SDK client.
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+        # STEP-02: Open the page and capture the CAPTCHA image as Base64.
         driver.get(URL)
         image = wait_for_xpath(driver, IMAGE_LOCATOR).screenshot_as_base64
-        solution = client.solve(
-            ImageToTextTask(
-                body=image,
-                numeric=4,
-                minLength=4,
-                maxLength=10,
-            )
+        # STEP-03: Add recognition hints when constructing the image task.
+        task = ImageToTextTask(
+            body=image,
+            numeric=4,
+            minLength=4,
+            maxLength=10,
         )
+        solution = client.solve(task)
+        # STEP-04: Fill and submit the recognized answer.
         wait_for_xpath(driver, ANSWER_LOCATOR).send_keys(solution["text"])
         print("Entered the answer to the captcha")
         wait_for_xpath(driver, SUBMIT_LOCATOR).click()
         print("Pressed the Check button")
+        # STEP-05: Verify the page accepted the answer.
         show_success(driver)
         time.sleep(5)
 

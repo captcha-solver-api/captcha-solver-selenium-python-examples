@@ -76,10 +76,12 @@ TENCENT_INTERCEPT_SCRIPT = r"""
 
 @logged_example
 def main() -> None:
+    # STEP-01: Read target-specific configuration and start the browser/client.
     target_url = required_env("TARGET_URL")
     success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
+        # STEP-02: Install the constructor interceptor before opening the page.
         driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument", {"source": TENCENT_INTERCEPT_SCRIPT}
         )
@@ -91,19 +93,24 @@ def main() -> None:
                 EC.element_to_be_clickable((By.CSS_SELECTOR, trigger_selector))
             ).click()
 
+        # STEP-03: Capture the app ID and other parameters passed by the page.
         params = WebDriverWait(driver, 30).until(
             lambda browser: browser.execute_script(
                 "return window.__captchaSolverTencent?.pending()[0] || null"
             )
         )
         record_id = params.pop("id")
-        solution = client.solve(TencentTaskProxyless(**params))
+        # STEP-04: Create the proxyless task and wait for ticket/randstr.
+        task = TencentTaskProxyless(**params)
+        solution = client.solve(task)
+        # STEP-05: Deliver the result to the original page callback.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
             "window.__captchaSolverTencent.submit(arguments[0], arguments[1])",
             record_id,
             solution,
         )
+        # STEP-06: Require the target's configured success element after delivery.
         message = wait_for_css(driver, success_selector)
         WebDriverWait(driver, 30).until(EC.visibility_of(message))
         print(message.text)
