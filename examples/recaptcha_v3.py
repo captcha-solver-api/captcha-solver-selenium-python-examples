@@ -1,4 +1,13 @@
-"""Request and apply a reCAPTCHA v3 token."""
+"""Request and apply a reCAPTCHA v3 token.
+
+What it does:
+    Extracts the site key and action used by grecaptcha.execute(), solves
+    RecaptchaV3TaskProxyless without a proxy, applies its token, and verifies page acceptance.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 extracts key/action. STEP-03 creates and solves the
+    score-based task. STEP-04 applies the token. STEP-05 checks the page result.
+"""
 
 import time
 

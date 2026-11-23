@@ -1,4 +1,13 @@
-"""Solve reCAPTCHA v2 with the same proxy in the browser and API task."""
+"""Solve reCAPTCHA v2 with the same proxy in the browser and API task.
+
+What it does:
+    Opens TARGET_URL through the configured proxy, extracts the site key, solves
+    RecaptchaV2Task through that proxy, submits the token, and verifies page acceptance.
+
+How it works:
+    STEP-01 configures browser/client. STEP-02 extracts the site key. STEP-03 creates and solves
+    the proxied task. STEP-04 submits its token. STEP-05 checks the page result.
+"""
 
 import time
 

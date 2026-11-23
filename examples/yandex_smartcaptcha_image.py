@@ -16,14 +16,19 @@ acceptance require the browser page from which the two images were captured.
 """
 
 import base64
+import os
 from pathlib import Path
 
+from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import YandexSmartCaptchaImageTask
-from common import create_client, logged_example
+from dotenv import load_dotenv
 
 ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 CHALLENGE_IMAGE = ASSETS_DIR / "yandex-smartcaptcha-image.png"
 INSTRUCTION_IMAGE = ASSETS_DIR / "yandex-smartcaptcha-instructions.png"
+
+# Load local development settings without overriding variables already set by the shell.
+load_dotenv(ASSETS_DIR.parent / ".env")
 
 
 def encode_image(path: Path) -> str:
@@ -31,14 +36,17 @@ def encode_image(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("ascii")
 
 
-@logged_example
 def main() -> None:
     # STEP-01: Read both parts of the same captured challenge from local assets.
     challenge = encode_image(CHALLENGE_IMAGE)
     instructions = encode_image(INSTRUCTION_IMAGE)
 
-    # STEP-02: Create the SDK client with CAPTCHA_API_KEY loaded by common.py.
-    with create_client() as client:
+    # STEP-02: Create the SDK client with the API key from the environment.
+    api_key = os.getenv("CAPTCHA_API_KEY")
+    if not api_key:
+        raise RuntimeError("Set CAPTCHA_API_KEY in the environment or .env file")
+
+    with CaptchaClient(api_key) as client:
         # STEP-03: Keep the main image and click-order instructions together in one task.
         task = YandexSmartCaptchaImageTask(
             image=challenge,

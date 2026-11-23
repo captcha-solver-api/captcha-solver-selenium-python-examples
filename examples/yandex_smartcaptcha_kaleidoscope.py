@@ -16,10 +16,12 @@ and its matching sequence, apply the clicks, and verify acceptance on the target
 """
 
 import base64
+import os
 from pathlib import Path
 
+from captcha_solver_api import CaptchaClient
 from captcha_solver_api.tasks import YandexSmartCaptchaKaleidoscopeTask
-from common import create_client, logged_example
+from dotenv import load_dotenv
 
 IMAGE_PATH = (
     Path(__file__).resolve().parent.parent / "assets" / "yandex-smartcaptcha-kaleidoscope.jpg"
@@ -83,14 +85,20 @@ PUZZLE_STEPS = [
     10,
 ]
 
+# Load local development settings without overriding variables already set by the shell.
+load_dotenv(IMAGE_PATH.parent.parent / ".env")
 
-@logged_example
+
 def main() -> None:
     # STEP-01: The SDK expects image bytes as Base64 without a data-URL prefix.
     image = base64.b64encode(IMAGE_PATH.read_bytes()).decode("ascii")
 
-    # STEP-02: Create the SDK client with CAPTCHA_API_KEY loaded by common.py.
-    with create_client() as client:
+    # STEP-02: Create the SDK client with the API key from the environment.
+    api_key = os.getenv("CAPTCHA_API_KEY")
+    if not api_key:
+        raise RuntimeError("Set CAPTCHA_API_KEY in the environment or .env file")
+
+    with CaptchaClient(api_key) as client:
         # STEP-03: The ordered steps must come from the same challenge as the image.
         task = YandexSmartCaptchaKaleidoscopeTask(image=image, task=PUZZLE_STEPS)
 

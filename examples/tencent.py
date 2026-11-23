@@ -1,4 +1,14 @@
-"""Solve Tencent CAPTCHA on a user-configured page."""
+"""Solve Tencent CAPTCHA on a user-configured page.
+
+What it does:
+    Installs an interceptor before TARGET_URL loads, captures Tencent constructor parameters,
+    solves TencentTaskProxyless, delivers ticket/randstr to the original callback, and checks the
+    target-specific success element.
+
+How it works:
+    STEP-01 loads configuration. STEP-02 installs interception. STEP-03 captures parameters.
+    STEP-04 solves the task. STEP-05 invokes the callback. STEP-06 checks the page signal.
+"""
 
 import os
 import time

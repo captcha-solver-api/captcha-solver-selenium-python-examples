@@ -1,4 +1,13 @@
-"""Solve callback-based reCAPTCHA v2 using the same proxy as the browser."""
+"""Solve callback-based reCAPTCHA v2 using the same proxy as the browser.
+
+What it does:
+    Opens TARGET_URL through a proxy, extracts the site key, solves RecaptchaV2Task through the
+    same proxy, passes its token to a known callback, and checks page acceptance.
+
+How it works:
+    STEP-01 configures browser/client. STEP-02 reads the site key. STEP-03 solves the proxied
+    task. STEP-04 invokes the callback. STEP-05 verifies the page result.
+"""
 
 import time
 

@@ -1,4 +1,13 @@
-"""Screenshot an image captcha, solve it, and fill its answer field."""
+"""Screenshot an image CAPTCHA, solve it, and fill its answer field.
+
+What it does:
+    Captures the CAPTCHA element on TARGET_URL, solves ImageToTextTask without a proxy, enters
+    the recognized text, submits the form, and checks that the page accepted it.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 captures Base64 pixels. STEP-03 solves the image task.
+    STEP-04 enters/submits the text. STEP-05 checks the page result.
+"""
 
 import time
 

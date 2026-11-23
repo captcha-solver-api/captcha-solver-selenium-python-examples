@@ -1,4 +1,13 @@
-"""Solve reCAPTCHA v2 in a SeleniumBase browser session."""
+"""Solve reCAPTCHA v2 in a SeleniumBase browser session.
+
+What it does:
+    Opens the official demo or TARGET_URL without a proxy, extracts the widget site key, solves
+    RecaptchaV2TaskProxyless, injects the token, submits the form, and checks page acceptance.
+
+How it works:
+    STEP-01 starts the browser/client. STEP-02 reads the site key. STEP-03 creates and solves the
+    SDK task. STEP-04 submits the token. STEP-05 requires the page's success message.
+"""
 
 import os
 import time

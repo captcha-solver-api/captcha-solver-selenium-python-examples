@@ -1,4 +1,13 @@
-"""Solve Yandex SmartCaptcha on the official demo with SeleniumBase."""
+"""Solve Yandex SmartCaptcha on the official demo with SeleniumBase.
+
+What it does:
+    Opens the official demo or TARGET_URL without a proxy, extracts its site key, solves
+    YandexSmartCaptchaTaskProxyless, submits the token, and requires the demo's success text.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 reads the site key. STEP-03 solves the SDK task.
+    STEP-04 submits the token. STEP-05 verifies acceptance independently of SDK completion.
+"""
 
 import os
 

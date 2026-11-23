@@ -1,4 +1,13 @@
-"""Intercept and solve Turnstile on a Cloudflare Challenge page."""
+"""Intercept and solve Turnstile on a Cloudflare Challenge page.
+
+What it does:
+    Intercepts Turnstile render parameters on TARGET_URL, solves TurnstileTaskProxyless with the
+    browser User-Agent, delivers the token to the captured callback, and checks page acceptance.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 installs the interceptor. STEP-03 solves from captured
+    parameters. STEP-04 invokes the callback. STEP-05 checks the explicit success signal.
+"""
 
 import os
 import time

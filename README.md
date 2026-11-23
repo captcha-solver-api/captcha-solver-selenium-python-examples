@@ -7,12 +7,16 @@ Examples of solving popular captcha types with
 [Selenium](https://www.selenium.dev/), and
 [`seleniumbase`](https://seleniumbase.io/).
 
-Each example shows how to:
+Browser-based examples show how to:
 
 1. Open a page and collect captcha parameters.
 2. Send a task to Captcha Solver.
 3. Apply the solution in the browser.
 4. Check that the page accepted the solution.
+
+Local image examples instead show how to read bundled assets, create an SDK
+task, and interpret the returned text, coordinates, or click count. Applying
+those results and confirming acceptance require the original browser page.
 
 ## Installation
 
@@ -61,20 +65,19 @@ authorized to test.
 |---|---|
 | reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha_v2.py) |
 | reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha_v2_proxy.py) |
-| reCAPTCHA v2 callback | [`recaptcha_v2_callback_variant1.py`](examples/recaptcha_v2_callback_variant1.py) |
-| reCAPTCHA v2 callback, automatic discovery | [`recaptcha_v2_callback_variant2.py`](examples/recaptcha_v2_callback_variant2.py) |
+| reCAPTCHA v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha_v2_callback.py) |
+| reCAPTCHA v2 callback, automatic discovery | [`recaptcha_v2_callback_auto.py`](examples/recaptcha_v2_callback_auto.py) |
 | reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha_v2_callback_proxy.py) |
 | reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha_v3.py) |
-| reCAPTCHA v3 interception | [`recaptcha_v3_extended_js_script.py`](examples/recaptcha_v3_extended_js_script.py) |
-| Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare_turnstile.py) |
-| Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare_challenge_page.py) |
+| Cloudflare Turnstile | [`turnstile.py`](examples/turnstile.py) |
+| Cloudflare Challenge | [`cloudflare_challenge.py`](examples/cloudflare_challenge.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) |
 | Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex_smartcaptcha.py) |
 | Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex_smartcaptcha_image.py) |
 | Yandex SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex_smartcaptcha_kaleidoscope.py) |
-| Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/normal_captcha_screenshot.py) |
+| Image captcha, screenshot | [`image_to_text.py`](examples/image_to_text.py) |
 | Image captcha, canvas | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) |
-| Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/normal_captcha_screenshot_params.py) |
+| Image captcha with parameters | [`normal_captcha_params.py`](examples/normal_captcha_params.py) |
 | Coordinates | [`coordinates.py`](examples/coordinates.py) |
 
 ## Yandex SmartCaptcha

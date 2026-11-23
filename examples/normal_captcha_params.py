@@ -1,4 +1,13 @@
-"""Solve the demo image captcha with additional recognition hints."""
+"""Solve an image CAPTCHA with additional recognition hints.
+
+What it does:
+    Screenshots the CAPTCHA on TARGET_URL, creates ImageToTextTask with character and length
+    hints, enters the recognized answer, submits the form, and checks acceptance.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 captures the image. STEP-03 adds hints and solves it.
+    STEP-04 enters/submits the text. STEP-05 checks the page result.
+"""
 
 import time
 

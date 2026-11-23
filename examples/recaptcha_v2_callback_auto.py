@@ -1,4 +1,13 @@
-"""Discover a reCAPTCHA v2 callback automatically and invoke it."""
+"""Discover a reCAPTCHA v2 callback automatically and invoke it.
+
+What it does:
+    Inspects reCAPTCHA runtime state on TARGET_URL, discovers its site key and callback, solves
+    RecaptchaV2TaskProxyless, calls the discovered function, and verifies the page result.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 inspects runtime configuration. STEP-03 solves the
+    task. STEP-04 invokes the discovered callback. STEP-05 checks its success signal.
+"""
 
 import time
 

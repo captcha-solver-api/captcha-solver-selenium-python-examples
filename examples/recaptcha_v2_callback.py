@@ -1,4 +1,13 @@
-"""Solve reCAPTCHA v2 and invoke the callback known by the demo page."""
+"""Solve reCAPTCHA v2 and invoke the callback known by the demo page.
+
+What it does:
+    Reads a widget site key from TARGET_URL, solves RecaptchaV2TaskProxyless, delivers the token
+    to the page's known callback, and checks the page's success message.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 extracts the site key. STEP-03 solves the SDK task.
+    STEP-04 invokes the site-specific callback. STEP-05 verifies callback handling.
+"""
 
 import time
 

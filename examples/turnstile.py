@@ -1,4 +1,13 @@
-"""Solve a standalone Cloudflare Turnstile widget."""
+"""Solve a standalone Cloudflare Turnstile widget.
+
+What it does:
+    Extracts the widget site key from TARGET_URL, solves TurnstileTaskProxyless, inserts the
+    returned token into the page response field, submits the form, and checks acceptance.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 extracts the site key. STEP-03 solves the SDK task.
+    STEP-04 submits the token. STEP-05 requires the page's success message.
+"""
 
 import time
 

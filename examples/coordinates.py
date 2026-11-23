@@ -1,4 +1,13 @@
-"""Solve a coordinate captcha and click the returned image positions."""
+"""Solve a coordinate CAPTCHA and click the returned image positions.
+
+What it does:
+    Captures a click CAPTCHA from TARGET_URL, solves CoordinatesTask without a proxy, scales the
+    returned source-image points to the rendered element, clicks them, and checks acceptance.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 captures pixels/dimensions. STEP-03 solves the task.
+    STEP-04 scales and clicks its points. STEP-05 submits and checks the page result.
+"""
 
 import base64
 import struct

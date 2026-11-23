@@ -1,4 +1,13 @@
-"""Extract the demo image captcha through canvas and submit its solution."""
+"""Extract an image CAPTCHA through canvas and submit its solution.
+
+What it does:
+    Copies rendered CAPTCHA pixels from TARGET_URL into a canvas, solves ImageToTextTask without
+    a proxy, fills the recognized text, submits the form, and checks acceptance.
+
+How it works:
+    STEP-01 starts browser/client. STEP-02 extracts Base64 pixels. STEP-03 solves the image task.
+    STEP-04 enters/submits the text. STEP-05 checks the page result.
+"""
 
 import time
 
