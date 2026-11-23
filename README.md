@@ -51,7 +51,7 @@ CAPTCHA_API_KEY=your_api_key
 ## Run
 
 ```bash
-python examples/recaptcha_v2.py
+python -m examples.recaptcha.recaptcha_v2
 ```
 
 The reCAPTCHA v2 example uses the official Google demo by default, and the
@@ -61,31 +61,36 @@ authorized to test.
 
 ## Examples
 
-| Captcha | File |
-|---|---|
-| reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha_v2.py) |
-| reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha_v2_proxy.py) |
-| reCAPTCHA v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha_v2_callback.py) |
-| reCAPTCHA v2 callback, automatic discovery | [`recaptcha_v2_callback_auto.py`](examples/recaptcha_v2_callback_auto.py) |
-| reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha_v2_callback_proxy.py) |
-| reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha_v3.py) |
-| Cloudflare Turnstile | [`turnstile.py`](examples/turnstile.py) |
-| Cloudflare Challenge | [`cloudflare_challenge.py`](examples/cloudflare_challenge.py) |
-| Tencent CAPTCHA | [`tencent.py`](examples/tencent.py) |
-| Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex_smartcaptcha.py) |
-| Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex_smartcaptcha_image.py) |
-| Yandex SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex_smartcaptcha_kaleidoscope.py) |
-| Image captcha, screenshot | [`image_to_text.py`](examples/image_to_text.py) |
-| Image captcha, canvas | [`normal_captcha_canvas.py`](examples/normal_captcha_canvas.py) |
-| Image captcha with parameters | [`normal_captcha_params.py`](examples/normal_captcha_params.py) |
-| Coordinates | [`coordinates.py`](examples/coordinates.py) |
+Examples are grouped by CAPTCHA provider or challenge type. Run them as Python modules from the
+repository root so imports remain stable on every operating system.
+
+| Group | Captcha | File |
+|---|---|---|
+| reCAPTCHA | v2 | [`recaptcha_v2.py`](examples/recaptcha/recaptcha_v2.py) |
+| reCAPTCHA | v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha/recaptcha_v2_proxy.py) |
+| reCAPTCHA | v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha/recaptcha_v2_callback.py) |
+| reCAPTCHA | v2 callback, automatic discovery | [`recaptcha_v2_callback_auto.py`](examples/recaptcha/recaptcha_v2_callback_auto.py) |
+| reCAPTCHA | v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
+| reCAPTCHA | v3 | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
+| Cloudflare | Turnstile | [`turnstile.py`](examples/cloudflare/turnstile.py) |
+| Cloudflare | Challenge | [`cloudflare_challenge.py`](examples/cloudflare/cloudflare_challenge.py) |
+| Tencent | Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
+| Yandex | SmartCaptcha token | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
+| Yandex | SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
+| Yandex | SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex/yandex_smartcaptcha_kaleidoscope.py) |
+| Image-to-text | Browser screenshot | [`image_to_text.py`](examples/image/image_to_text.py) |
+| Image-to-text | Browser canvas | [`normal_captcha_canvas.py`](examples/image/normal_captcha_canvas.py) |
+| Image-to-text | Recognition parameters | [`normal_captcha_params.py`](examples/image/normal_captcha_params.py) |
+| Image-to-text | Bundled image | [`image_to_text_local.py`](examples/image/image_to_text_local.py) |
+| Coordinates | Browser clicks | [`coordinates.py`](examples/coordinates/coordinates.py) |
+| Coordinates | Bundled image | [`coordinates_local.py`](examples/coordinates/coordinates_local.py) |
 
 ## Yandex SmartCaptcha
 
 After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 
 ```bash
-python examples/yandex_smartcaptcha.py
+python -m examples.yandex.yandex_smartcaptcha
 ```
 
 Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
@@ -100,14 +105,30 @@ console logging as the other examples. Running it creates a paid solving task.
 Two image-based examples use captured assets and do not open a browser:
 
 ```bash
-python examples/yandex_smartcaptcha_image.py
-python examples/yandex_smartcaptcha_kaleidoscope.py
+python -m examples.yandex.yandex_smartcaptcha_image
+python -m examples.yandex.yandex_smartcaptcha_kaleidoscope
 ```
 
 The image example returns ordered points to click. The Kaleidoscope example
 returns the required number of slider-arrow clicks. These examples demonstrate
 task creation and result handling; applying a captured result and checking that
 a live page accepts it are necessarily site-specific.
+
+## Bundled image assets
+
+Reusable captures are grouped under `assets/`:
+
+- `assets/image-to-text/` contains text, digits, and math CAPTCHA images plus math instructions;
+- `assets/coordinates/` contains generic coordinates, fruit, and traffic-light challenges plus
+  traffic-light instructions;
+- `assets/yandex/` contains SmartCaptcha image, instruction, and Kaleidoscope captures.
+
+Run the basic local examples with:
+
+```bash
+python -m examples.image.image_to_text_local
+python -m examples.coordinates.coordinates_local
+```
 
 To adapt it to a page you are authorized to test, set `TARGET_URL` and update
 `SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.
