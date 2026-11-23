@@ -70,6 +70,8 @@ authorized to test.
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
 | Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
+| Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
+| Yandex SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex/yandex_smartcaptcha_kaleidoscope.py) |
 | Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/image/normal_captcha_screenshot.py) |
 | Image captcha, canvas | [`normal_captcha_canvas.py`](examples/image/normal_captcha_canvas.py) |
 | Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/image/normal_captcha_screenshot_params.py) |
@@ -81,6 +83,13 @@ After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 
 ```bash
 python -m examples.yandex.yandex_smartcaptcha
+```
+
+Captured image challenges can be checked separately:
+
+```bash
+python -m examples.yandex.yandex_smartcaptcha_image
+python -m examples.yandex.yandex_smartcaptcha_kaleidoscope
 ```
 
 Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
