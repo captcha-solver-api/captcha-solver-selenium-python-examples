@@ -91,6 +91,23 @@ repository root so imports remain stable on every operating system.
 | Coordinates | Browser clicks | [`coordinates.py`](examples/coordinates/coordinates.py) |
 | Coordinates | Bundled image | [`coordinates_local.py`](examples/coordinates/coordinates_local.py) |
 
+### Solution fields and proxy usage
+
+| Task family | Proxy status | `solve()` result used by the example |
+|---|---|---|
+| reCAPTCHA v2/v3 | Proxyless or Proxy, as named in the file | `gRecaptchaResponse` token |
+| Turnstile / Cloudflare Challenge | Proxyless | `token`; Challenge also requires a new `cf_clearance` cookie |
+| Yandex SmartCaptcha token | Proxyless | `token` |
+| Yandex SmartCaptcha image | Not applicable; images are uploaded directly | ordered `coordinates` |
+| Yandex Kaleidoscope | Not applicable; image data is uploaded directly | slider-arrow click count string |
+| Image-to-text | Not applicable; image data is uploaded directly | recognized `text` |
+| Coordinates | Not applicable; image data is uploaded directly | ordered `coordinates` |
+| Tencent | Proxyless | ticket/randstr solution passed to the page callback |
+
+These values are the return value of `CaptchaClient.solve()`, not the complete transport response.
+Uncaught configuration, browser, SDK, and verification errors terminate the Python process with a
+non-zero exit code; browser context managers close their sessions during normal exception cleanup.
+
 ## Yandex SmartCaptcha
 
 After installation, set `CAPTCHA_API_KEY` in `.env` and run:

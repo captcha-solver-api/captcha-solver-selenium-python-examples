@@ -56,38 +56,6 @@ def wait_for_xpath(driver, locator: str, timeout: int = 30):
     return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
 
 
-def show_success(driver) -> None:
-    """Require the exact target-specific success text configured by the user."""
-    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
-    WebDriverWait(driver, 30).until(
-        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
-    )
-    print(f"Page confirmation: {expected_text}")
-
-
-def proxy_settings() -> dict:
-    """Build the SDK proxy options from the same values used by the browser."""
-    return {
-        "proxyType": required_env("PROXY_TYPE"),
-        "proxyAddress": required_env("PROXY_ADDRESS"),
-        "proxyPort": int(required_env("PROXY_PORT")),
-        "proxyLogin": os.getenv("PROXY_LOGIN"),
-        "proxyPassword": os.getenv("PROXY_PASSWORD"),
-    }
-
-
-def selenium_proxy() -> str:
-    """Build SeleniumBase's proxy string from the configured proxy options."""
-    settings = proxy_settings()
-    address = settings["proxyAddress"]
-    port = settings["proxyPort"]
-    login = settings["proxyLogin"]
-    password = settings["proxyPassword"]
-    if login and password:
-        return f"{login}:{password}@{address}:{port}"
-    return f"{address}:{port}"
-
-
 def fill_response_field(driver, field_name: str, token: str) -> None:
     """Set a target-specific response field and dispatch its input/change events."""
     driver.execute_script(

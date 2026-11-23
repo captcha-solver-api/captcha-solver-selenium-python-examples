@@ -53,59 +53,6 @@ def wait_for_css(driver, selector: str, timeout: int = 30):
     )
 
 
-def wait_for_xpath(driver, locator: str, timeout: int = 30):
-    """Wait until a target-specific XPath is visible and enabled."""
-    return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
-
-
-def show_success(driver) -> None:
-    """Require the exact target-specific success text configured by the user."""
-    expected_text = required_env("CAPTCHA_SUCCESS_TEXT")
-    WebDriverWait(driver, 30).until(
-        EC.text_to_be_present_in_element((By.TAG_NAME, "body"), expected_text)
-    )
-    print(f"Page confirmation: {expected_text}")
-
-
-def proxy_settings() -> dict:
-    """Build the SDK proxy options from the same values used by the browser."""
-    return {
-        "proxyType": required_env("PROXY_TYPE"),
-        "proxyAddress": required_env("PROXY_ADDRESS"),
-        "proxyPort": int(required_env("PROXY_PORT")),
-        "proxyLogin": os.getenv("PROXY_LOGIN"),
-        "proxyPassword": os.getenv("PROXY_PASSWORD"),
-    }
-
-
-def selenium_proxy() -> str:
-    """Build SeleniumBase's proxy string from the configured proxy options."""
-    settings = proxy_settings()
-    address = settings["proxyAddress"]
-    port = settings["proxyPort"]
-    login = settings["proxyLogin"]
-    password = settings["proxyPassword"]
-    if login and password:
-        return f"{login}:{password}@{address}:{port}"
-    return f"{address}:{port}"
-
-
-def fill_response_field(driver, field_name: str, token: str) -> None:
-    """Set a target-specific response field and dispatch its input/change events."""
-    driver.execute_script(
-        """
-        const field = document.querySelector(`[name="${arguments[0]}"]`);
-        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
-        field.value = arguments[1];
-        field.innerHTML = arguments[1];
-        field.dispatchEvent(new Event('input', {bubbles: true}));
-        field.dispatchEvent(new Event('change', {bubbles: true}));
-        """,
-        field_name,
-        token,
-    )
-
-
 TENCENT_INTERCEPT_SCRIPT = r"""
 (() => {
   const CALLBACK_OR_OPTIONS_INDEX = 1;
@@ -176,6 +123,7 @@ def main() -> None:
     # STEP-01: Read target-specific configuration and start the browser/client.
     target_url = required_env("TENCENT_TARGET_URL")
     success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
+    expected_success_text = required_env("CAPTCHA_SUCCESS_TEXT")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Install the constructor interceptor before opening the page.
@@ -210,7 +158,11 @@ def main() -> None:
         )
         # STEP-06: Require the target's configured success element after delivery.
         message = wait_for_css(driver, success_selector)
-        WebDriverWait(driver, 30).until(EC.visibility_of(message))
+        WebDriverWait(driver, 30).until(
+            EC.text_to_be_present_in_element(
+                (By.CSS_SELECTOR, success_selector), expected_success_text
+            )
+        )
         print(message.text)
 
 

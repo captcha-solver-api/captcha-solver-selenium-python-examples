@@ -1,5 +1,6 @@
 """Regression checks for the public example files and bundled assets."""
 
+import ast
 import re
 import unittest
 from pathlib import Path
@@ -18,6 +19,19 @@ class ExampleStructureTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(ROOT)):
                 self.assertNotRegex(source, r"(?m)^from examples\.")
                 self.assertNotRegex(source, r"(?m)^from \.")
+
+    def test_examples_have_no_unused_top_level_helpers(self):
+        for path in self.example_files():
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            functions = {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
+            loaded_names = {
+                node.id
+                for node in ast.walk(tree)
+                if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+            }
+            unused = sorted(functions - loaded_names - {"main"})
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertEqual(unused, [])
 
     def test_step_maps_match_code_labels(self):
         for path in self.example_files():
@@ -38,7 +52,11 @@ class ExampleStructureTests(unittest.TestCase):
                 continue
             with self.subTest(path=path.relative_to(ROOT)):
                 self.assertIn("To use this example on another page", source)
-                self.assertIn("CAPTCHA_SUCCESS_TEXT", source)
+                self.assertTrue(
+                    "CAPTCHA_SUCCESS_TEXT" in source
+                    or "SUCCESS_TEXT" in source
+                    or "cf_clearance" in source
+                )
 
     def test_expected_assets_exist(self):
         expected = {

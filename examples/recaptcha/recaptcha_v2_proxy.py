@@ -46,13 +46,6 @@ def create_client() -> CaptchaClient:
     return CaptchaClient(required_env("CAPTCHA_API_KEY"))
 
 
-def wait_for_css(driver, selector: str, timeout: int = 30):
-    """Wait until a target-specific CSS selector exists."""
-    return WebDriverWait(driver, timeout).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-    )
-
-
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
     """Wait until a target-specific XPath is visible and enabled."""
     return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))

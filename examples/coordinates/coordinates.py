@@ -68,45 +68,6 @@ def show_success(driver) -> None:
     print(f"Page confirmation: {expected_text}")
 
 
-def proxy_settings() -> dict:
-    """Build the SDK proxy options from the same values used by the browser."""
-    return {
-        "proxyType": required_env("PROXY_TYPE"),
-        "proxyAddress": required_env("PROXY_ADDRESS"),
-        "proxyPort": int(required_env("PROXY_PORT")),
-        "proxyLogin": os.getenv("PROXY_LOGIN"),
-        "proxyPassword": os.getenv("PROXY_PASSWORD"),
-    }
-
-
-def selenium_proxy() -> str:
-    """Build SeleniumBase's proxy string from the configured proxy options."""
-    settings = proxy_settings()
-    address = settings["proxyAddress"]
-    port = settings["proxyPort"]
-    login = settings["proxyLogin"]
-    password = settings["proxyPassword"]
-    if login and password:
-        return f"{login}:{password}@{address}:{port}"
-    return f"{address}:{port}"
-
-
-def fill_response_field(driver, field_name: str, token: str) -> None:
-    """Set a target-specific response field and dispatch its input/change events."""
-    driver.execute_script(
-        """
-        const field = document.querySelector(`[name="${arguments[0]}"]`);
-        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
-        field.value = arguments[1];
-        field.innerHTML = arguments[1];
-        field.dispatchEvent(new Event('input', {bubbles: true}));
-        field.dispatchEvent(new Event('change', {bubbles: true}));
-        """,
-        field_name,
-        token,
-    )
-
-
 URL = required_env("COORDINATES_TARGET_URL")
 IMAGE_SELECTOR = "img[alt='clickcaptcha example']"
 SUBMIT_LOCATOR = "//button[@type='submit']"

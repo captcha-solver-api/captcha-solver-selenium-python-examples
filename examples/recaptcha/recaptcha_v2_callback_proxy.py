@@ -46,13 +46,6 @@ def create_client() -> CaptchaClient:
     return CaptchaClient(required_env("CAPTCHA_API_KEY"))
 
 
-def wait_for_css(driver, selector: str, timeout: int = 30):
-    """Wait until a target-specific CSS selector exists."""
-    return WebDriverWait(driver, timeout).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-    )
-
-
 def wait_for_xpath(driver, locator: str, timeout: int = 30):
     """Wait until a target-specific XPath is visible and enabled."""
     return WebDriverWait(driver, timeout).until(EC.element_to_be_clickable((By.XPATH, locator)))
@@ -88,22 +81,6 @@ def selenium_proxy() -> str:
     if login and password:
         return f"{login}:{password}@{address}:{port}"
     return f"{address}:{port}"
-
-
-def fill_response_field(driver, field_name: str, token: str) -> None:
-    """Set a target-specific response field and dispatch its input/change events."""
-    driver.execute_script(
-        """
-        const field = document.querySelector(`[name="${arguments[0]}"]`);
-        if (!field) throw new Error(`Response field ${arguments[0]} was not found`);
-        field.value = arguments[1];
-        field.innerHTML = arguments[1];
-        field.dispatchEvent(new Event('input', {bubbles: true}));
-        field.dispatchEvent(new Event('change', {bubbles: true}));
-        """,
-        field_name,
-        token,
-    )
 
 
 URL = required_env("RECAPTCHA_V2_TARGET_URL")
