@@ -1,1 +1,0 @@
-"""Coordinate-based CAPTCHA examples."""

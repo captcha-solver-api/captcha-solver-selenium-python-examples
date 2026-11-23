@@ -51,7 +51,7 @@ CAPTCHA_API_KEY=your_api_key
 ## Run
 
 ```bash
-python -m examples.recaptcha.recaptcha_v2
+python examples/recaptcha/recaptcha_v2.py
 ```
 
 The reCAPTCHA v2 example uses the official Google demo by default, and the
@@ -67,8 +67,8 @@ returned by that target page.
 
 ## Examples
 
-Examples are grouped by CAPTCHA provider or challenge type. Run them as Python modules from the
-repository root so imports remain stable on every operating system.
+Examples are grouped by CAPTCHA provider or challenge type. Each file is self-contained and can
+be run directly from the repository root.
 
 | Group | Captcha | File |
 |---|---|---|
@@ -113,7 +113,7 @@ non-zero exit code; browser context managers close their sessions during normal 
 After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 
 ```bash
-python -m examples.yandex.yandex_smartcaptcha
+python examples/yandex/yandex_smartcaptcha.py
 ```
 
 Leave `YANDEX_SMARTCAPTCHA_TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
@@ -128,8 +128,8 @@ parameter extraction, task construction, submission, and verification in its own
 Two image-based examples use captured assets and do not open a browser:
 
 ```bash
-python -m examples.yandex.yandex_smartcaptcha_image
-python -m examples.yandex.yandex_smartcaptcha_kaleidoscope
+python examples/yandex/yandex_smartcaptcha_image.py
+python examples/yandex/yandex_smartcaptcha_kaleidoscope.py
 ```
 
 The image example returns ordered points to click. The Kaleidoscope example
@@ -149,8 +149,8 @@ Reusable captures are grouped under `assets/`:
 Run the basic local examples with:
 
 ```bash
-python -m examples.image.image_to_text_local
-python -m examples.coordinates.coordinates_local
+python examples/image/image_to_text_local.py
+python examples/coordinates/coordinates_local.py
 ```
 
 To adapt it to a page you are authorized to test, set `YANDEX_SMARTCAPTCHA_TARGET_URL` and update

@@ -13,6 +13,9 @@ class ExampleStructureTests(unittest.TestCase):
     def example_files(self):
         return sorted(path for path in EXAMPLES.rglob("*.py") if path.name != "__init__.py")
 
+    def test_example_directories_are_not_packages(self):
+        self.assertEqual(list(EXAMPLES.rglob("__init__.py")), [])
+
     def test_examples_are_self_contained(self):
         for path in self.example_files():
             source = path.read_text(encoding="utf-8")
