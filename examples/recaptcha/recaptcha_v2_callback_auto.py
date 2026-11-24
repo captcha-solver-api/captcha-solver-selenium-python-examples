@@ -1,4 +1,20 @@
-"""Discover a reCAPTCHA v2 callback automatically and invoke it."""
+"""Discover a reCAPTCHA v2 callback automatically and invoke it.
+
+What it does:
+    Inspects reCAPTCHA's runtime client configuration to find a site key and callback path,
+    solves ``RecaptchaV2TaskProxyless`` without a proxy, invokes the discovered callback with
+    the token, and verifies the page's success message through ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Inspect the page's reCAPTCHA runtime configuration.
+    STEP-03 - Create and solve the task with the discovered site key.
+    STEP-04 - Resolve the callback path and deliver the token.
+    STEP-05 - Require the page's explicit success message.
+
+The internal client structure is not a stable public page API. Callback discovery, invocation,
+and acceptance checks must be tested against each target page.
+"""
 
 import time
 

@@ -1,4 +1,20 @@
-"""Solve a coordinate captcha and click the returned image positions."""
+"""Solve a coordinate CAPTCHA and click the returned image positions.
+
+What it does:
+    Copies a rendered click-CAPTCHA image into a canvas, sends its Base64 pixels in a
+    ``CoordinatesTask``, scales the returned image coordinates to the displayed element,
+    clicks them, and verifies the submitted answer. No proxy is used.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Capture the original image pixels and dimensions.
+    STEP-03 - Create and solve the coordinate task.
+    STEP-04 - Scale and click each returned point in order.
+    STEP-05 - Submit the clicks and require the page's success message.
+
+Image selectors, click geometry, submission, and acceptance checks are site-specific. Confirm
+the coordinate origin and scaling rules when adapting the example.
+"""
 
 import base64
 import struct

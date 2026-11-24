@@ -1,4 +1,20 @@
-"""Extract the demo image captcha through canvas and submit its solution."""
+"""Extract an image CAPTCHA through canvas and submit its solution.
+
+What it does:
+    Draws the rendered CAPTCHA into a temporary canvas, extracts its Base64 pixels, solves an
+    ``ImageToTextTask`` without a proxy, fills the answer, and verifies page acceptance. The
+    task is submitted with ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Copy the rendered CAPTCHA pixels through a canvas.
+    STEP-03 - Create and solve the image-to-text task.
+    STEP-04 - Fill the recognized answer and submit the form.
+    STEP-05 - Require the page's success message.
+
+Canvas extraction can fail for cross-origin images. Selectors, submission, and the acceptance
+signal are also site-specific and must be inspected on another target.
+"""
 
 import time
 

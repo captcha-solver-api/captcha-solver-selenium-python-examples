@@ -1,4 +1,20 @@
-"""Solve reCAPTCHA v2 and invoke the callback known by the demo page."""
+"""Solve reCAPTCHA v2 and invoke a callback known by the page.
+
+What it does:
+    Reads the widget site key, solves ``RecaptchaV2TaskProxyless`` without a proxy, passes the
+    returned token to the page's named callback, and checks its success message. The SDK task is
+    submitted and awaited by ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Open the page and extract the widget site key.
+    STEP-03 - Create and solve the proxyless task.
+    STEP-04 - Deliver the token to the page callback.
+    STEP-05 - Require the page's explicit success message.
+
+Callback names and success signals are page-specific. Discover and validate the target page's
+own callback before adapting this example.
+"""
 
 import time
 

@@ -1,4 +1,22 @@
-"""Solve Tencent CAPTCHA on a user-configured page."""
+"""Solve Tencent CAPTCHA on a user-configured page.
+
+What it does:
+    Intercepts construction of the page's Tencent CAPTCHA, captures its app ID and script URL,
+    solves ``TencentTaskProxyless`` without a proxy, sends the returned ticket and randstr to
+    the original callback, and waits for a configured success element. It uses
+    ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Read target settings and start Chrome and the SDK client.
+    STEP-02 - Install the constructor interceptor before navigation.
+    STEP-03 - Capture parameters passed by the page.
+    STEP-04 - Create and solve the proxyless task.
+    STEP-05 - Deliver the complete solution to the original callback.
+    STEP-06 - Require the configured page success element.
+
+Trigger controls, callback behavior, and the success selector are site-specific. Callback
+delivery confirms only that the page received the solution; the final element checks acceptance.
+"""
 
 import os
 import time

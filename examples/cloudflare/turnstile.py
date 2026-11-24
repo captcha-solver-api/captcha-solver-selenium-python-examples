@@ -1,4 +1,20 @@
-"""Solve a standalone Cloudflare Turnstile widget."""
+"""Solve a standalone Cloudflare Turnstile widget.
+
+What it does:
+    Reads a widget site key from a user-configured page, solves a proxyless Turnstile task,
+    places the returned token in the demo form, and verifies that the page accepts it. The
+    example uses ``TurnstileTaskProxyless`` and ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Open the page and extract ``data-sitekey`` from the widget.
+    STEP-03 - Create and solve the proxyless task.
+    STEP-04 - Put the token in the response field and submit the form.
+    STEP-05 - Require the page's success message.
+
+Response fields, submission controls, and success signals are site-specific. Inspect and
+update them before using this flow on another page.
+"""
 
 import time
 

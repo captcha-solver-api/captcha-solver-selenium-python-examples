@@ -1,4 +1,20 @@
-"""Request and apply a reCAPTCHA v3 token."""
+"""Request and apply a reCAPTCHA v3 token.
+
+What it does:
+    Finds the site key and action used by ``grecaptcha.execute()``, solves a score-based
+    ``RecaptchaV3TaskProxyless`` without a proxy, passes the token into the page integration,
+    submits the form, and checks acceptance through ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Extract the site key and action from page scripts.
+    STEP-03 - Create and solve the score-based task.
+    STEP-04 - Apply the token through the page integration.
+    STEP-05 - Require the page's success message.
+
+Script patterns, callbacks, submission, and success indicators are site-specific. Inspect the
+target's v3 execution path before adapting the example.
+"""
 
 import time
 

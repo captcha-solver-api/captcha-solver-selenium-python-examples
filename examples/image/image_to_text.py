@@ -1,4 +1,20 @@
-"""Screenshot an image captcha, solve it, and fill its answer field."""
+"""Screenshot an image CAPTCHA, solve it, and fill its answer field.
+
+What it does:
+    Captures only the CAPTCHA element as Base64, sends it in an ``ImageToTextTask`` without a
+    proxy, enters the recognized text into the form, and checks that the page accepts it. It
+    uses ``CaptchaClient.solve()`` to submit the task and wait for the result.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Open the page and capture the CAPTCHA element.
+    STEP-03 - Create and solve the image-to-text task.
+    STEP-04 - Enter the returned text and submit the form.
+    STEP-05 - Require the page's success message.
+
+The image, answer, submit, and success selectors belong to the configured page and must be
+updated together when adapting this example.
+"""
 
 import time
 

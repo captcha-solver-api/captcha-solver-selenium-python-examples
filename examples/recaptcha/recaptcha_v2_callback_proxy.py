@@ -1,4 +1,20 @@
-"""Solve callback-based reCAPTCHA v2 using the same proxy as the browser."""
+"""Solve callback-based reCAPTCHA v2 using the browser's proxy.
+
+What it does:
+    Opens the page through a configured proxy, extracts its site key, creates a
+    ``RecaptchaV2Task`` with the same proxy and browser User-Agent, delivers the token to the
+    page callback, and checks its success message with ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and the SDK client with shared proxy settings.
+    STEP-02 - Open the page and extract its widget site key.
+    STEP-03 - Create and solve a task through the same proxy.
+    STEP-04 - Deliver the token to the page callback.
+    STEP-05 - Require the page's explicit success message.
+
+The callback and success selector are site-specific. Keep browser and task proxy identity
+consistent when adapting this flow.
+"""
 
 import time
 

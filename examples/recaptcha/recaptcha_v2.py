@@ -1,4 +1,20 @@
-"""Solve reCAPTCHA v2 in a SeleniumBase browser session."""
+"""Solve reCAPTCHA v2 in a SeleniumBase browser session.
+
+What it does:
+    Extracts the widget site key, solves ``RecaptchaV2TaskProxyless``, injects the returned
+    ``gRecaptchaResponse`` into the demo form, submits it, and checks page acceptance. No proxy
+    is used; ``CaptchaClient.solve()`` creates the task and waits for its result.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Open the page and extract its widget site key.
+    STEP-03 - Create and solve the proxyless task.
+    STEP-04 - Inject the token and submit the form.
+    STEP-05 - Require the page's success message.
+
+Token fields, callbacks, submission, and success indicators are site-specific. Inspect the
+target integration before applying the token on another page.
+"""
 
 import os
 import time

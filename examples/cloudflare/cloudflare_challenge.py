@@ -1,4 +1,21 @@
-"""Intercept and solve Turnstile on a Cloudflare Challenge page."""
+"""Intercept and solve Turnstile on a Cloudflare Challenge page.
+
+What it does:
+    Opens a user-configured Cloudflare Challenge page, captures the parameters passed to
+    ``turnstile.render()``, solves them without a proxy, and returns the token through the
+    page's original callback. The example uses ``TurnstileTaskProxyless`` and
+    ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome with the User-Agent that will be sent to the solver.
+    STEP-02 - Install a render interceptor before reloading the challenge page.
+    STEP-03 - Build and solve a task from the captured challenge parameters.
+    STEP-04 - Deliver the returned token to the captured callback.
+    STEP-05 - Require the page's explicit success message.
+
+Callback delivery and the success selector are site-specific. When adapting this example,
+inspect the target page and update both the delivery mechanism and acceptance check.
+"""
 
 import os
 import time

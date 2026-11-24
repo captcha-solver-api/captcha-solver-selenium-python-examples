@@ -1,4 +1,20 @@
-"""Solve reCAPTCHA v2 with the same proxy in the browser and API task."""
+"""Solve reCAPTCHA v2 with the same proxy in the browser and task.
+
+What it does:
+    Opens the target through a configured proxy, extracts the site key, solves a
+    ``RecaptchaV2Task`` with matching proxy and User-Agent values, injects the token, submits
+    the form, and verifies acceptance through ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and the SDK client with shared proxy settings.
+    STEP-02 - Open the page and extract its widget site key.
+    STEP-03 - Create and solve the proxied task.
+    STEP-04 - Inject the token and submit the form.
+    STEP-05 - Require the page's success message.
+
+Keep browser and solver proxy identity consistent. Response fields, submission controls, and
+success indicators are site-specific.
+"""
 
 import time
 

@@ -1,4 +1,20 @@
-"""Solve the demo image captcha with additional recognition hints."""
+"""Solve an image CAPTCHA with additional recognition hints.
+
+What it does:
+    Screenshots a CAPTCHA element, creates an ``ImageToTextTask`` with numeric and length
+    constraints, enters the recognized text, and verifies page acceptance. The proxyless task
+    is submitted through ``CaptchaClient.solve()``.
+
+How it works:
+    STEP-01 - Start Chrome and create the SDK client.
+    STEP-02 - Capture the CAPTCHA element as Base64.
+    STEP-03 - Create and solve the task with recognition hints.
+    STEP-04 - Fill the returned text and submit the form.
+    STEP-05 - Require the page's success message.
+
+Choose recognition hints that match the target CAPTCHA; incorrect constraints can make a valid
+image unsolvable. Page selectors and acceptance checks are site-specific.
+"""
 
 import time
 
