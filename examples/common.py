@@ -45,7 +45,7 @@ def logged_example(function):
             result = function(*args, **kwargs)
         except Exception as error:
             print(f"An error occurred: {error}")
-            print("Failed to solve captcha")
+            print("Example failed; check the traceback to identify the failed stage")
             raise
         print("Finished")
         return result

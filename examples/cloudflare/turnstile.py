@@ -22,6 +22,7 @@ import time
 from pathlib import Path
 
 from captcha_solver_api.tasks import TurnstileTaskProxyless
+from selenium.common.exceptions import ElementClickInterceptedException
 from seleniumbase import Driver
 
 if __package__ in {None, ""}:
@@ -59,7 +60,15 @@ def main() -> None:
         # Token injection and submission are site-specific; adapt this step to the target page.
         fill_response_field(driver, "cf-turnstile-response", solution["token"])
         print("Token sent")
-        wait_for_xpath(driver, SUBMIT_LOCATOR).click()
+        submit = wait_for_xpath(driver, SUBMIT_LOCATOR)
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit)
+        try:
+            submit.click()
+        except ElementClickInterceptedException:
+            # Some demo layouts leave the Turnstile iframe over the submit button.
+            # Dispatch the same button click after confirming the intended element.
+            print("Native click was intercepted; submitting with JavaScript")
+            driver.execute_script("arguments[0].click();", submit)
         print("Pressed the Check button")
         # STEP-05: Require the page's success message after submission.
         show_success(driver)
