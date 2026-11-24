@@ -6,16 +6,17 @@ What it does:
     the original callback, and waits for a configured success element. It uses
     ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Read target settings and start Chrome and the SDK client.
-    STEP-02 - Install the constructor interceptor before navigation.
-    STEP-03 - Capture parameters passed by the page.
-    STEP-04 - Create and solve the proxyless task.
-    STEP-05 - Deliver the complete solution to the original callback.
-    STEP-06 - Require the configured page success element.
+To use this example on another page, change the target URL and verify how that page constructs
+Tencent CAPTCHA. The app ID, script URL, trigger, ticket/randstr callback, submission, and
+success indicator are site-specific, so inspect them before applying the solution.
 
-Trigger controls, callback behavior, and the success selector are site-specific. Callback
-delivery confirms only that the page received the solution; the final element checks acceptance.
+How it works:
+    STEP-01 - Read target-specific configuration and start the browser/client.
+    STEP-02 - Install the constructor interceptor before opening the page.
+    STEP-03 - Capture the app ID and other parameters passed by the page.
+    STEP-04 - Create the proxyless task and wait for ticket/randstr.
+    STEP-05 - Deliver the result to the original page callback.
+    STEP-06 - Require the target's configured success element after delivery.
 """
 
 import os

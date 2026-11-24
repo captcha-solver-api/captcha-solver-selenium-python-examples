@@ -5,15 +5,16 @@ What it does:
     proxy, enters the recognized text into the form, and checks that the page accepts it. It
     uses ``CaptchaClient.solve()`` to submit the task and wait for the result.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Open the page and capture the CAPTCHA element.
-    STEP-03 - Create and solve the image-to-text task.
-    STEP-04 - Enter the returned text and submit the form.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and update the CAPTCHA image,
+answer field, submit control, and success indicator. These selectors and the answer format are
+site-specific.
 
-The image, answer, submit, and success selectors belong to the configured page and must be
-updated together when adapting this example.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the page and capture only the CAPTCHA image as Base64.
+    STEP-03 - Create the image task and wait for recognized text.
+    STEP-04 - Enter the returned text and submit this demo's form.
+    STEP-05 - Verify the page accepted the answer.
 """
 
 import time

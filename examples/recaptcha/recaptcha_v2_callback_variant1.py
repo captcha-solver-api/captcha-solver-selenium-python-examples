@@ -5,15 +5,16 @@ What it does:
     returned token to the page's named callback, and checks its success message. The SDK task is
     submitted and awaited by ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Open the page and extract the widget site key.
-    STEP-03 - Create and solve the proxyless task.
-    STEP-04 - Deliver the token to the page callback.
-    STEP-05 - Require the page's explicit success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-Callback names and success signals are page-specific. Discover and validate the target page's
-own callback before adapting this example.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the configured page and read its widget site key.
+    STEP-03 - Create and solve the proxyless reCAPTCHA task.
+    STEP-04 - Pass the token to the callback registered by this demo page.
+    STEP-05 - Confirm that the page handled the callback successfully.
 """
 
 import time

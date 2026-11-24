@@ -5,14 +5,15 @@ What it does:
     without a proxy. It uses YandexSmartCaptchaKaleidoscopeTask and CaptchaClient.solve(), which
     returns the number of slider-arrow clicks.
 
-How it works:
-    STEP-01 - Read and Base64-encode the bundled Kaleidoscope image.
-    STEP-02 - Configure CaptchaClient with CAPTCHA_API_KEY.
-    STEP-03 - Create YandexSmartCaptchaKaleidoscopeTask with the image and captured steps.
-    STEP-04 - Send the task with client.solve() and print the required click count.
+The step sequence belongs to this captured image. A live integration must capture a fresh
+image and its matching sequence, apply the returned clicks to the original challenge, and
+verify acceptance on that page.
 
-The step sequence belongs to this captured image. A live integration must capture a fresh image
-and its matching sequence, apply the clicks, and verify acceptance on the target page.
+How it works:
+    STEP-01 - The SDK expects image bytes as Base64 without a data-URL prefix.
+    STEP-02 - Create the SDK client with the API key from the environment.
+    STEP-03 - The ordered steps must come from the same challenge as the image.
+    STEP-04 - solve() returns a plain click-count string for this task type.
 """
 
 import base64

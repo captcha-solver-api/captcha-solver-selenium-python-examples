@@ -6,15 +6,16 @@ What it does:
     page's original callback. The example uses ``TurnstileTaskProxyless`` and
     ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome with the User-Agent that will be sent to the solver.
-    STEP-02 - Install a render interceptor before reloading the challenge page.
-    STEP-03 - Build and solve a task from the captured challenge parameters.
-    STEP-04 - Deliver the returned token to the captured callback.
-    STEP-05 - Require the page's explicit success message.
+To use this example on another page, change the target URL and verify the captured site key,
+action, challenge data, User-Agent, and callback. Token delivery, submission, and success
+indicators are site-specific, so inspect the page before applying the token.
 
-Callback delivery and the success selector are site-specific. When adapting this example,
-inspect the target page and update both the delivery mechanism and acceptance check.
+How it works:
+    STEP-01 - Start Chrome with the same User-Agent sent in the solver task.
+    STEP-02 - Install the interceptor before reloading the challenge page.
+    STEP-03 - Build the task from captured render options and solve it.
+    STEP-04 - Deliver the token to the callback captured from this page.
+    STEP-05 - Verify the page's explicit success signal after callback delivery.
 """
 
 import os

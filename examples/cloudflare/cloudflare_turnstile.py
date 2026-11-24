@@ -5,15 +5,16 @@ What it does:
     places the returned token in the demo form, and verifies that the page accepts it. The
     example uses ``TurnstileTaskProxyless`` and ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Open the page and extract ``data-sitekey`` from the widget.
-    STEP-03 - Create and solve the proxyless task.
-    STEP-04 - Put the token in the response field and submit the form.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-Response fields, submission controls, and success signals are site-specific. Inspect and
-update them before using this flow on another page.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the page and extract the widget's public site key.
+    STEP-03 - Create and solve the proxyless Turnstile task.
+    STEP-04 - Put the token into this demo's response field.
+    STEP-05 - Require the page's success message after submission.
 """
 
 import time

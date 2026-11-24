@@ -5,15 +5,16 @@ What it does:
     inserts the token into the demo form, submits it, and verifies the server response. The
     SDK task is submitted and awaited with ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Extract the public site key from the widget.
-    STEP-03 - Create and solve the proxyless task.
-    STEP-04 - Put the token in the demo field and submit the form.
-    STEP-05 - Require the official demo's success text.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-Token fields, submission controls, and success indicators are site-specific. Inspect all three
-before adapting this example to another page.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Read the public widget key from the page opened in this browser.
+    STEP-03 - Create the task; solve() submits it and waits for its solution.
+    STEP-04 - Token injection and submission are site-specific; adapt this step.
+    STEP-05 - Confirm acceptance by the site, not just receipt of an API token.
 """
 
 import os

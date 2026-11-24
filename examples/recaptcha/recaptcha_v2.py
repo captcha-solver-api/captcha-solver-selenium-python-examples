@@ -5,15 +5,16 @@ What it does:
     ``gRecaptchaResponse`` into the demo form, submits it, and checks page acceptance. No proxy
     is used; ``CaptchaClient.solve()`` creates the task and waits for its result.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Open the page and extract its widget site key.
-    STEP-03 - Create and solve the proxyless task.
-    STEP-04 - Inject the token and submit the form.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-Token fields, callbacks, submission, and success indicators are site-specific. Inspect the
-target integration before applying the token on another page.
+How it works:
+    STEP-01 - Start the browser and SDK client; the client reads CAPTCHA_API_KEY.
+    STEP-02 - Open the page and extract the site key rendered by its widget.
+    STEP-03 - Build the proxyless task and let solve() create and poll it.
+    STEP-04 - Apply the token using this page's response field and submit the form.
+    STEP-05 - Require the page's success message; receiving a token is not acceptance.
 """
 
 import os

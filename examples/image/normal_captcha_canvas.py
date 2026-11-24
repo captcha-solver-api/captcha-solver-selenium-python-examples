@@ -5,15 +5,16 @@ What it does:
     ``ImageToTextTask`` without a proxy, fills the answer, and verifies page acceptance. The
     task is submitted with ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Copy the rendered CAPTCHA pixels through a canvas.
-    STEP-03 - Create and solve the image-to-text task.
-    STEP-04 - Fill the recognized answer and submit the form.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and update the CAPTCHA image,
+answer field, submit control, and success indicator. These selectors and the answer format are
+site-specific, and canvas extraction also requires an image that is not blocked by cross-origin rules.
 
-Canvas extraction can fail for cross-origin images. Selectors, submission, and the acceptance
-signal are also site-specific and must be inspected on another target.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the page and copy the rendered CAPTCHA pixels through a canvas.
+    STEP-03 - Create the image task and wait for recognized text.
+    STEP-04 - Fill and submit the answer using this demo's controls.
+    STEP-05 - Verify the page accepted the submitted answer.
 """
 
 import time

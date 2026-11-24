@@ -5,15 +5,16 @@ What it does:
     ``RecaptchaV2Task`` with the same proxy and browser User-Agent, delivers the token to the
     page callback, and checks its success message with ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and the SDK client with shared proxy settings.
-    STEP-02 - Open the page and extract its widget site key.
-    STEP-03 - Create and solve a task through the same proxy.
-    STEP-04 - Deliver the token to the page callback.
-    STEP-05 - Require the page's explicit success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-The callback and success selector are site-specific. Keep browser and task proxy identity
-consistent when adapting this flow.
+How it works:
+    STEP-01 - Start browser and SDK client with one shared proxy.
+    STEP-02 - Open the page through the proxy and extract its site key.
+    STEP-03 - Create and solve the task through the same proxy.
+    STEP-04 - Deliver the token to this demo's callback.
+    STEP-05 - Verify successful callback handling on the page.
 """
 
 import time

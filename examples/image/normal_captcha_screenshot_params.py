@@ -5,15 +5,16 @@ What it does:
     constraints, enters the recognized text, and verifies page acceptance. The proxyless task
     is submitted through ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Capture the CAPTCHA element as Base64.
-    STEP-03 - Create and solve the task with recognition hints.
-    STEP-04 - Fill the returned text and submit the form.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and update the CAPTCHA image,
+answer field, submit control, and success indicator. These selectors and the answer format are
+site-specific.
 
-Choose recognition hints that match the target CAPTCHA; incorrect constraints can make a valid
-image unsolvable. Page selectors and acceptance checks are site-specific.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the page and capture the CAPTCHA image as Base64.
+    STEP-03 - Add recognition hints when constructing the image task.
+    STEP-04 - Fill and submit the recognized answer.
+    STEP-05 - Verify the page accepted the answer.
 """
 
 import time

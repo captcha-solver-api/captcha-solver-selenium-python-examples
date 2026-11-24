@@ -5,15 +5,16 @@ What it does:
     ``RecaptchaV3TaskProxyless`` without a proxy, passes the token into the page integration,
     submits the form, and checks acceptance through ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Extract the site key and action from page scripts.
-    STEP-03 - Create and solve the score-based task.
-    STEP-04 - Apply the token through the page integration.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-Script patterns, callbacks, submission, and success indicators are site-specific. Inspect the
-target's v3 execution path before adapting the example.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the page and extract the key/action used by grecaptcha.execute().
+    STEP-03 - Create the score-based task and wait for its token.
+    STEP-04 - Apply the token using this target page's integration.
+    STEP-05 - Verify page acceptance independently of SDK completion.
 """
 
 import time

@@ -3,17 +3,19 @@
 What it does:
     Copies a rendered click-CAPTCHA image into a canvas, sends its Base64 pixels in a
     ``CoordinatesTask``, scales the returned image coordinates to the displayed element,
-    clicks them, and verifies the submitted answer. No proxy is used.
+    clicks them, and verifies the submitted answer. No proxy is used; the task is submitted and
+    awaited with ``CaptchaClient.solve()``.
+
+To use this example on another page, change the target URL and update the image and submit
+selectors. Click geometry, scaling, submission, and success indicators are site-specific, so
+confirm the coordinate origin and displayed image dimensions before applying the points.
 
 How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Capture the original image pixels and dimensions.
-    STEP-03 - Create and solve the coordinate task.
-    STEP-04 - Scale and click each returned point in order.
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Capture the source pixels and dimensions of the rendered click CAPTCHA.
+    STEP-03 - Create the coordinate task and wait for image-space click points.
+    STEP-04 - Scale source-image points to the displayed element before clicking.
     STEP-05 - Submit the clicks and require the page's success message.
-
-Image selectors, click geometry, submission, and acceptance checks are site-specific. Confirm
-the coordinate origin and scaling rules when adapting the example.
 """
 
 import base64

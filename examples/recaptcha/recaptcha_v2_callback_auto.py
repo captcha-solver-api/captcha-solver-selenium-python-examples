@@ -5,15 +5,16 @@ What it does:
     solves ``RecaptchaV2TaskProxyless`` without a proxy, invokes the discovered callback with
     the token, and verifies the page's success message through ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and create the SDK client.
-    STEP-02 - Inspect the page's reCAPTCHA runtime configuration.
-    STEP-03 - Create and solve the task with the discovered site key.
-    STEP-04 - Resolve the callback path and deliver the token.
-    STEP-05 - Require the page's explicit success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-The internal client structure is not a stable public page API. Callback discovery, invocation,
-and acceptance checks must be tested against each target page.
+How it works:
+    STEP-01 - Start the browser and SDK client.
+    STEP-02 - Open the page and inspect reCAPTCHA's runtime configuration.
+    STEP-03 - Create and solve the task with the discovered site key.
+    STEP-04 - Resolve the discovered callback and deliver the token to it.
+    STEP-05 - Require the demo page's explicit success message.
 """
 
 import time

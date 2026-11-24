@@ -5,14 +5,15 @@ What it does:
     without a proxy. It uses YandexSmartCaptchaImageTask and CaptchaClient.solve(), which
     returns ordered pixel coordinates.
 
-How it works:
-    STEP-01 - Locate and Base64-encode the bundled challenge assets.
-    STEP-02 - Configure CaptchaClient with CAPTCHA_API_KEY.
-    STEP-03 - Create YandexSmartCaptchaImageTask with both images.
-    STEP-04 - Send the task with client.solve() and print the ordered click coordinates.
+This offline example intentionally stops after printing the result. A live integration must
+capture both images from the same challenge, click the original image at the returned points
+in order, account for any scaling, and verify acceptance on that page.
 
-The example intentionally stops after printing the result: applying coordinates and checking
-acceptance require the browser page from which the two images were captured.
+How it works:
+    STEP-01 - Read both parts of the same captured challenge from local assets.
+    STEP-02 - Create the SDK client with the API key from the environment.
+    STEP-03 - Keep the main image and click-order instructions together in one task.
+    STEP-04 - solve() creates the task, waits for it, and returns ordered coordinates.
 """
 
 import base64

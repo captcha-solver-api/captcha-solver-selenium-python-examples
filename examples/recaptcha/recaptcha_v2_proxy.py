@@ -5,15 +5,16 @@ What it does:
     ``RecaptchaV2Task`` with matching proxy and User-Agent values, injects the token, submits
     the form, and verifies acceptance through ``CaptchaClient.solve()``.
 
-How it works:
-    STEP-01 - Start Chrome and the SDK client with shared proxy settings.
-    STEP-02 - Open the page and extract its widget site key.
-    STEP-03 - Create and solve the proxied task.
-    STEP-04 - Inject the token and submit the form.
-    STEP-05 - Require the page's success message.
+To use this example on another page, change the target URL and verify the site key and any
+challenge-specific parameters required by that page. Token fields, callbacks, submission, and
+success indicators are site-specific, so inspect the page before applying the token.
 
-Keep browser and solver proxy identity consistent. Response fields, submission controls, and
-success indicators are site-specific.
+How it works:
+    STEP-01 - Start browser and SDK client with one shared proxy configuration.
+    STEP-02 - Open the page through the proxy and extract its site key.
+    STEP-03 - Create the proxied task with the browser's User-Agent.
+    STEP-04 - Apply the token and submit this page's form.
+    STEP-05 - Require the page's success message.
 """
 
 import time
