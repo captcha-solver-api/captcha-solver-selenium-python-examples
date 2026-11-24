@@ -3,8 +3,8 @@
 What it does:
     Opens a reCAPTCHA v2 Enterprise page, extracts its site key, solves a
     ``RecaptchaV2EnterpriseTaskProxyless`` without a proxy, inserts the returned token into
-    the response field, submits the form, and checks page acceptance with
-    ``CaptchaClient.solve()``.
+    the response field, exposes it through the Enterprise page API, submits the
+    form, and checks the page's acceptance message.
 
 To use this example on another page, change the target URL and inspect the Enterprise site key,
 ``enterprisePayload``, invisibility mode, token field, submission control, and success
@@ -44,9 +44,12 @@ URL = required_env(
 )
 SITEKEY_SELECTOR = "[data-sitekey]"
 SUBMIT_LOCATOR = "//*[@type='submit']"
-SUCCESS_SELECTOR = os.getenv(
-    "RECAPTCHA_V2_ENTERPRISE_SUCCESS_SELECTOR",
-    ".recaptcha-success, p.successMessage",
+SUCCESS_SELECTOR = (
+    os.getenv(
+        "RECAPTCHA_V2_ENTERPRISE_SUCCESS_SELECTOR",
+        "",
+    )
+    or "[role='alert']"
 )
 
 
@@ -76,8 +79,29 @@ def main() -> None:
             raise RuntimeError("Solver returned an empty Enterprise token")
 
         # STEP-04: Insert the returned token and submit the form.
-        # Token injection and submission are site-specific; adapt this step to the target page.
+        # This React form reads grecaptcha.enterprise.getResponse() during submission, so keep
+        # both the native response field and the page API synchronized with the solved token.
         fill_response_field(driver, "g-recaptcha-response", token)
+        driver.execute_script(
+            """
+            const token = arguments[0];
+            const field = document.querySelector('[name="g-recaptcha-response"]');
+            const nativeSetter = Object.getOwnPropertyDescriptor(
+              HTMLTextAreaElement.prototype,
+              'value'
+            ).set;
+            nativeSetter.call(field, token);
+            field.dispatchEvent(new Event('input', {bubbles: true}));
+            field.dispatchEvent(new Event('change', {bubbles: true}));
+
+            const enterprise = window.grecaptcha?.enterprise;
+            if (!enterprise || typeof enterprise.getResponse !== 'function') {
+              throw new Error('grecaptcha.enterprise.getResponse is unavailable');
+            }
+            enterprise.getResponse = () => token;
+            """,
+            token,
+        )
         print("Enterprise token sent")
         submit = wait_for_xpath(driver, SUBMIT_LOCATOR)
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit)
@@ -85,7 +109,14 @@ def main() -> None:
         print("Submitted the Enterprise form")
 
         # STEP-05: Require the page's explicit success signal.
-        print(wait_for_css(driver, SUCCESS_SELECTOR).text)
+        result = wait_for_css(driver, SUCCESS_SELECTOR)
+        message = result.text.strip()
+        if not message:
+            raise RuntimeError("The Enterprise page returned an empty result message")
+        result_class = (result.get_attribute("class") or "").lower()
+        if "error" in result_class:
+            raise RuntimeError(f"The Enterprise page rejected the token: {message}")
+        print(f"Page confirmation: {message}")
         time.sleep(5)
 
 
