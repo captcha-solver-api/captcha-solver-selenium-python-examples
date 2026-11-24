@@ -36,7 +36,7 @@ from examples.common import (  # noqa: E402
     wait_for_xpath,
 )
 
-URL = required_env("TARGET_URL")
+URL = required_env("RECAPTCHA_V3_TARGET_URL", "TARGET_URL")
 SUBMIT_LOCATOR = "//button[@type='submit']"
 
 FIND_PARAMS = r"""

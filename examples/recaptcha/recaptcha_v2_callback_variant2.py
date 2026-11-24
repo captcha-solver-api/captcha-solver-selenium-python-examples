@@ -30,7 +30,7 @@ if __package__ in {None, ""}:
 
 from examples.common import create_client, logged_example, required_env, show_success  # noqa: E402
 
-URL = required_env("TARGET_URL")
+URL = required_env("RECAPTCHA_V2_TARGET_URL", "TARGET_URL")
 
 FIND_CLIENT = """
 const clients = window.___grecaptcha_cfg?.clients || {};

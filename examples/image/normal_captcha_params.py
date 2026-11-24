@@ -35,7 +35,7 @@ from examples.common import (  # noqa: E402
     wait_for_xpath,
 )
 
-URL = required_env("TARGET_URL")
+URL = required_env("IMAGE_TARGET_URL", "TARGET_URL")
 IMAGE_LOCATOR = "//img[contains(@class,'captchaImage')]"
 ANSWER_LOCATOR = "//input[@id='simple-captcha-field']"
 SUBMIT_LOCATOR = "//button[@type='submit']"

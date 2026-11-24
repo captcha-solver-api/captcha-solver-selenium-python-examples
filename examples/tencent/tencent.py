@@ -102,7 +102,7 @@ TENCENT_INTERCEPT_SCRIPT = r"""
 @logged_example
 def main() -> None:
     # STEP-01: Read target-specific configuration and start the browser/client.
-    target_url = required_env("TARGET_URL")
+    target_url = required_env("TENCENT_TARGET_URL", "TARGET_URL")
     success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:

@@ -38,7 +38,11 @@ from examples.common import (  # noqa: E402
     wait_for_xpath,
 )
 
-URL = os.getenv("TARGET_URL") or "https://captcha-api.yandex.ru/demo"
+URL = (
+    os.getenv("YANDEX_TARGET_URL")
+    or os.getenv("TARGET_URL")
+    or "https://captcha-api.yandex.ru/demo"
+)
 SITEKEY_SELECTOR = ".smart-captcha[data-sitekey]"
 SUBMIT_LOCATOR = "//*[@id='smartcaptcha-demo-submit']"
 SUCCESS_TEXT = "Hello, user!"

@@ -53,11 +53,14 @@ def logged_example(function):
     return wrapper
 
 
-def required_env(name: str) -> str:
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"Set {name} in the environment or .env file")
-    return value
+def required_env(*names: str) -> str:
+    """Return the first configured variable, allowing specific-to-generic fallbacks."""
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    expected = " or ".join(names)
+    raise RuntimeError(f"Set {expected} in the environment or .env file")
 
 
 def create_client() -> CaptchaClient:

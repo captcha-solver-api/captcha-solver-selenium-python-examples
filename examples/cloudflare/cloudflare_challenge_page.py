@@ -33,7 +33,7 @@ if __package__ in {None, ""}:
 
 from examples.common import create_client, logged_example, required_env, show_success  # noqa: E402
 
-URL = required_env("TARGET_URL")
+URL = required_env("TURNSTILE_CHALLENGE_TARGET_URL", "TARGET_URL")
 BROWSER_USER_AGENT = os.getenv("BROWSER_USER_AGENT") or (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"

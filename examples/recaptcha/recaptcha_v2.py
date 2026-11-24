@@ -36,7 +36,11 @@ from examples.common import (  # noqa: E402
     wait_for_xpath,
 )
 
-URL = os.getenv("TARGET_URL") or "https://www.google.com/recaptcha/api2/demo"
+URL = (
+    os.getenv("RECAPTCHA_V2_TARGET_URL")
+    or os.getenv("TARGET_URL")
+    or "https://www.google.com/recaptcha/api2/demo"
+)
 SITEKEY_LOCATOR = "//*[@data-sitekey]"
 SUBMIT_LOCATOR = "//*[@type='submit']"
 SUCCESS_SELECTOR = ".recaptcha-success, p.successMessage"

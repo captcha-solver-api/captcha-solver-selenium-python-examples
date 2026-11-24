@@ -47,13 +47,13 @@ CAPTCHA_API_KEY=your_api_key
 ## Run
 
 ```bash
-python -m examples.recaptcha.recaptcha_v2
+python examples/recaptcha/recaptcha_v2.py
 ```
 
 The reCAPTCHA v2 example uses the official Google demo by default, and the
-Yandex SmartCaptcha example uses the official Yandex demo. Set
-`TARGET_URL` in `.env` to run another example against a page you are
-authorized to test.
+Yandex SmartCaptcha example uses the official Yandex demo. Set the matching
+`*_TARGET_URL` variable in `.env` to run another example against a page you
+are authorized to test. `TARGET_URL` remains available as a generic fallback.
 
 ## Examples
 
@@ -82,17 +82,18 @@ authorized to test.
 After installation, set `CAPTCHA_API_KEY` in `.env` and run:
 
 ```bash
-python -m examples.yandex.yandex_smartcaptcha
+python examples/yandex/yandex_smartcaptcha.py
 ```
 
 Captured image challenges can be checked separately:
 
 ```bash
-python -m examples.yandex.yandex_smartcaptcha_image
-python -m examples.yandex.yandex_smartcaptcha_kaleidoscope
+python examples/yandex/yandex_smartcaptcha_image.py
+python examples/yandex/yandex_smartcaptcha_kaleidoscope.py
 ```
 
-Leave `TARGET_URL` empty to use `https://captcha-api.yandex.ru/demo`.
+Leave `YANDEX_TARGET_URL` and `TARGET_URL` empty to use
+`https://captcha-api.yandex.ru/demo`.
 The example reads the widget's `data-sitekey` and the browser's User-Agent,
 requests a token using `YandexSmartCaptchaTaskProxyless`, fills `smart-token`,
 and submits the form. It reports success only after the page returns
@@ -101,8 +102,8 @@ and submits the form. It reports success only after the page returns
 The example uses the same `.env` configuration, shared API client, and
 console logging as the other examples. Running it creates a paid solving task.
 
-To adapt it to a page you are authorized to test, set `TARGET_URL` and update
-`SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.
+To adapt it to a page you are authorized to test, set `YANDEX_TARGET_URL` and
+update `SITEKEY_SELECTOR`, `SUBMIT_LOCATOR`, and the success check in the script.
 If your application uses a callback instead of reading `smart-token`, adapt
 the token delivery to that callback as well.
 
@@ -114,7 +115,7 @@ the token delivery to that callback as well.
 Tencent requires your own target page and selectors:
 
 ```dotenv
-TARGET_URL=https://your-site.example/tencent-captcha
+TENCENT_TARGET_URL=https://example.com/page_with_tencent_captcha
 TENCENT_TRIGGER_SELECTOR=#open-captcha
 TENCENT_SUCCESS_SELECTOR=.verification-success
 ```
