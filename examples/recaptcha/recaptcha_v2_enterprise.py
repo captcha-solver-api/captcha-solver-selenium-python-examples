@@ -49,7 +49,7 @@ SUCCESS_SELECTOR = (
         "RECAPTCHA_V2_ENTERPRISE_SUCCESS_SELECTOR",
         "",
     )
-    or "[role='alert']"
+    or "p[class*='successMessage'], [role='alert']"
 )
 
 
@@ -114,7 +114,8 @@ def main() -> None:
         if not message:
             raise RuntimeError("The Enterprise page returned an empty result message")
         result_class = (result.get_attribute("class") or "").lower()
-        if "error" in result_class:
+        result_role = (result.get_attribute("role") or "").lower()
+        if result_role == "alert" or "error" in result_class:
             raise RuntimeError(f"The Enterprise page rejected the token: {message}")
         print(f"Page confirmation: {message}")
         time.sleep(5)
