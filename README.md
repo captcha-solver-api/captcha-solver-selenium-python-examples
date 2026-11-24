@@ -42,7 +42,11 @@ Set your API key in `.env`:
 
 ```dotenv
 CAPTCHA_API_KEY=your_api_key
+CAPTCHA_SOLVE_TIMEOUT=300
 ```
+
+`CAPTCHA_SOLVE_TIMEOUT` controls how many seconds `CaptchaClient.solve()` waits while polling.
+The examples default to 300 seconds when the variable is omitted.
 
 ## Run
 

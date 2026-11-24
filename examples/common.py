@@ -66,7 +66,14 @@ def required_env(*names: str) -> str:
 def create_client() -> CaptchaClient:
     # SDK debug output includes sanitized task payloads, task IDs, polling updates,
     # request timing, and the final poll count without exposing credentials or images.
-    return ConsoleCaptchaClient(required_env("CAPTCHA_API_KEY"), debug=True)
+    solve_timeout = int(os.getenv("CAPTCHA_SOLVE_TIMEOUT", "300"))
+    if solve_timeout <= 0:
+        raise RuntimeError("CAPTCHA_SOLVE_TIMEOUT must be a positive number of seconds")
+    return ConsoleCaptchaClient(
+        required_env("CAPTCHA_API_KEY"),
+        timeout=solve_timeout,
+        debug=True,
+    )
 
 
 def wait_for_css(driver, selector: str, timeout: int = 30):
