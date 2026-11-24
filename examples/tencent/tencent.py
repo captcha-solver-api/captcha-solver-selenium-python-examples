@@ -3,8 +3,8 @@
 What it does:
     Intercepts construction of the page's Tencent CAPTCHA, captures its app ID and script URL,
     solves ``TencentTaskProxyless`` without a proxy, sends the returned ticket and randstr to
-    the original callback, and waits for a configured success element. It uses
-    ``CaptchaClient.solve()``.
+    the original callback, and confirms delivery from the interceptor. If the target renders a
+    success element, the example can additionally wait for its configured CSS selector.
 
 To use this example on another page, change the target URL and verify how that page constructs
 Tencent CAPTCHA. The app ID, script URL, trigger, ticket/randstr callback, submission, and
@@ -16,7 +16,7 @@ How it works:
     STEP-03 - Capture the app ID and other parameters passed by the page.
     STEP-04 - Create the proxyless task and wait for ticket/randstr.
     STEP-05 - Deliver the result to the original page callback.
-    STEP-06 - Require the target's configured success element after delivery.
+    STEP-06 - Confirm callback delivery and optionally require a target success element.
 """
 
 import os
@@ -83,7 +83,20 @@ TENCENT_INTERCEPT_SCRIPT = r"""
       const record = records.get(id);
       if (!record || record.submitted) throw new Error('Tencent CAPTCHA callback is missing.');
       record.submitted = true;
-      record.callback(solution);
+      try {
+        record.callback(solution);
+        record.callbackCompleted = true;
+      } catch (error) {
+        // Some targets hand the result to a mobile WebView bridge that is absent in Chrome.
+        const message = String(error);
+        if (!/tbs_external|nativeCall|WebView/i.test(message)) throw error;
+        record.callbackError = message;
+      }
+      return {
+        submitted: record.submitted,
+        callbackCompleted: Boolean(record.callbackCompleted),
+        callbackError: record.callbackError || null
+      };
     }
   }});
 
@@ -103,7 +116,7 @@ TENCENT_INTERCEPT_SCRIPT = r"""
 def main() -> None:
     # STEP-01: Read target-specific configuration and start the browser/client.
     target_url = required_env("TENCENT_TARGET_URL", "TARGET_URL")
-    success_selector = required_env("TENCENT_SUCCESS_SELECTOR")
+    success_selector = os.getenv("TENCENT_SUCCESS_SELECTOR")
 
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Install the constructor interceptor before opening the page.
@@ -129,15 +142,22 @@ def main() -> None:
         solution = client.solve(TencentTaskProxyless(**params))
         # STEP-05: Deliver the result to the original page callback.
         # Token injection and submission are site-specific; adapt this step to the target page.
-        driver.execute_script(
-            "window.__captchaSolverTencent.submit(arguments[0], arguments[1])",
+        delivery = driver.execute_script(
+            "return window.__captchaSolverTencent.submit(arguments[0], arguments[1])",
             record_id,
             solution,
         )
-        # STEP-06: Require the target's configured success element after delivery.
-        message = wait_for_css(driver, success_selector)
-        WebDriverWait(driver, 30).until(EC.visibility_of(message))
-        print(message.text)
+        # STEP-06: Confirm callback delivery and optionally require a target success element.
+        if not delivery or not delivery.get("submitted"):
+            raise RuntimeError("The Tencent CAPTCHA result was not delivered to the page callback")
+        print("Tencent CAPTCHA result delivered to the original page callback")
+        if delivery.get("callbackError"):
+            print("The page callback reached a native WebView bridge unavailable in Chrome")
+
+        if success_selector:
+            message = wait_for_css(driver, success_selector)
+            WebDriverWait(driver, 30).until(EC.visibility_of(message))
+            print(message.text)
         time.sleep(5)
 
 
