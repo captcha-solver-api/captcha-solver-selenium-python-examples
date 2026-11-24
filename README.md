@@ -72,10 +72,12 @@ are authorized to test. `TARGET_URL` remains available as a generic fallback.
 | Captcha | File |
 |---|---|
 | reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha/recaptcha_v2.py) |
+| reCAPTCHA v2 Enterprise | [`recaptcha_v2_enterprise.py`](examples/recaptcha/recaptcha_v2_enterprise.py) |
 | reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha/recaptcha_v2_proxy.py) |
 | reCAPTCHA v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha/recaptcha_v2_callback.py) |
 | reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
 | reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
+| reCAPTCHA v3 Enterprise | [`recaptcha_v3_enterprise.py`](examples/recaptcha/recaptcha_v3_enterprise.py) |
 | Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare/cloudflare_turnstile.py) |
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
