@@ -82,9 +82,9 @@ are authorized to test. `TARGET_URL` remains available as a generic fallback.
 | Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
 | Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
 | Yandex SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex/yandex_smartcaptcha_kaleidoscope.py) |
-| Image captcha, screenshot | [`normal_captcha_screenshot.py`](examples/image/normal_captcha_screenshot.py) |
-| Image captcha, canvas | [`normal_captcha_canvas.py`](examples/image/normal_captcha_canvas.py) |
-| Image captcha with parameters | [`normal_captcha_screenshot_params.py`](examples/image/normal_captcha_screenshot_params.py) |
+| Image captcha, text | [`image_to_text.py`](examples/image/image_to_text.py) |
+| Image captcha, digits | [`image_to_text_digits.py`](examples/image/image_to_text_digits.py) |
+| Image captcha, math | [`image_to_text_math.py`](examples/image/image_to_text_math.py) |
 | Coordinates | [`coordinates.py`](examples/coordinates/coordinates.py) |
 
 ## Yandex SmartCaptcha

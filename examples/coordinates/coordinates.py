@@ -1,103 +1,49 @@
-"""Solve a coordinate CAPTCHA and click the returned image positions.
+"""Solve a coordinate CAPTCHA from a bundled local image.
 
 What it does:
-    Copies a rendered click-CAPTCHA image into a canvas, sends its Base64 pixels in a
-    ``CoordinatesTask``, scales the returned image coordinates to the displayed element,
-    clicks them, and verifies the submitted answer. No proxy is used; the task is submitted and
-    awaited with ``CaptchaClient.solve()``.
+    Reads ``assets/coordinates/coordinates-captcha.png``, Base64-encodes it, submits a
+    ``CoordinatesTask`` without a proxy, and prints the pixel coordinates returned by
+    ``CaptchaClient.solve()``.
 
-To use this example on another page, change the target URL and update the image and submit
-selectors. Click geometry, scaling, submission, and success indicators are site-specific, so
-confirm the coordinate origin and displayed image dimensions before applying the points.
+This offline example intentionally stops after printing the result. In a live integration,
+click the original CAPTCHA image at the returned points, accounting for any display scaling,
+and verify acceptance on the page that supplied the image.
 
 How it works:
-    STEP-01 - Start the browser and SDK client.
-    STEP-02 - Capture the source pixels and dimensions of the rendered click CAPTCHA.
-    STEP-03 - Create the coordinate task and wait for image-space click points.
-    STEP-04 - Scale source-image points to the displayed element before clicking.
-    STEP-05 - Submit the clicks and require the page's success message.
+    STEP-01 - Read and Base64-encode the bundled coordinate CAPTCHA image.
+    STEP-02 - Create the SDK client with the API key from the environment.
+    STEP-03 - Create and solve the coordinate task.
+    STEP-04 - Print the returned image-space coordinates.
 """
 
 import base64
-import struct
 import sys
-import time
 from pathlib import Path
 
 from captcha_solver_api.tasks import CoordinatesTask
-from selenium.webdriver import ActionChains
-from seleniumbase import Driver
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from examples.common import (  # noqa: E402
-    create_client,
-    logged_example,
-    required_env,
-    show_success,
-    wait_for_css,
-    wait_for_xpath,
-)
+from examples.common import create_client, logged_example  # noqa: E402
 
-URL = required_env("COORDINATES_TARGET_URL", "TARGET_URL")
-IMAGE_SELECTOR = "img[alt='clickcaptcha example']"
-SUBMIT_LOCATOR = "//button[@type='submit']"
-
-CANVAS_SCRIPT = """
-const image = document.querySelector(arguments[0]);
-const canvas = document.createElement('canvas');
-canvas.width = image.naturalWidth;
-canvas.height = image.naturalHeight;
-canvas.getContext('2d').drawImage(image, 0, 0);
-return canvas.toDataURL('image/png').split(',', 2)[1];
-"""
-
-
-def png_size(png_base64: str):
-    image = base64.b64decode(png_base64)
-    return struct.unpack(">II", image[16:24])
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+IMAGE_PATH = REPOSITORY_ROOT / "assets" / "coordinates" / "coordinates-captcha.png"
 
 
 @logged_example
 def main() -> None:
-    # STEP-01: Start the browser and SDK client.
-    with Driver(browser="chrome", headless=False) as driver, create_client() as client:
-        # STEP-02: Capture the source pixels and dimensions of the rendered click CAPTCHA.
-        driver.get(URL)
-        captcha = wait_for_css(driver, IMAGE_SELECTOR)
-        image = driver.execute_script(CANVAS_SCRIPT, IMAGE_SELECTOR)
-        image_width, image_height = png_size(image)
-        # STEP-03: Create the coordinate task and wait for image-space click points.
+    # STEP-01: Read and Base64-encode the bundled coordinate CAPTCHA image.
+    image = base64.b64encode(IMAGE_PATH.read_bytes()).decode("ascii")
+
+    # STEP-02: Create the SDK client with the API key from the environment.
+    with create_client() as client:
+        # STEP-03: Create and solve the coordinate task.
         solution = client.solve(CoordinatesTask(body=image))
 
-        # STEP-04: Scale source-image points to the displayed element before clicking.
-        scale_x = captcha.size["width"] / image_width
-        scale_y = captcha.size["height"] / image_height
-        print(
-            "Image size:",
-            (image_width, image_height),
-            "displayed size:",
-            (captcha.size["width"], captcha.size["height"]),
-            "coordinates:",
-            solution["coordinates"],
-        )
-        print("The received response is converted into a list of coordinates")
-        for point in solution["coordinates"]:
-            ActionChains(driver).move_to_element_with_offset(
-                captcha,
-                point["x"] * scale_x - captcha.size["width"] / 2,
-                point["y"] * scale_y - captcha.size["height"] / 2,
-            ).click().perform()
-        print("The coordinates are marked on the image")
-
-        # STEP-05: Submit the clicks and require the page's success message.
-        submit = wait_for_xpath(driver, SUBMIT_LOCATOR)
-        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", submit)
-        driver.execute_script("arguments[0].click();", submit)
-        print("Pressed the Check button")
-        show_success(driver)
-        time.sleep(5)
+        # STEP-04: Print the returned image-space coordinates.
+        print("Coordinates:", solution["coordinates"])
+        print("Apply these x/y points to the original image in the returned order.")
 
 
 if __name__ == "__main__":
