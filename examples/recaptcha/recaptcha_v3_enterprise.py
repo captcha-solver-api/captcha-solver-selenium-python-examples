@@ -3,8 +3,8 @@
 What it does:
     Extracts the site key and action used by ``grecaptcha.enterprise.execute()``, solves a
     ``RecaptchaV3TaskProxyless`` with ``isEnterprise=True`` and no proxy, delivers the
-    token to the configured page callback, and verifies acceptance with
-    ``CaptchaClient.solve()``.
+    token to the configured page callback, and verifies acceptance from the
+    result rendered by the page.
 
 To use this example on another page, change the target URL and inspect the Enterprise site key,
 action, minimum score, callback, submission behavior, and success indicator. Token delivery and
@@ -34,9 +34,12 @@ from examples.common import create_client, logged_example, required_env, wait_fo
 
 URL = required_env("RECAPTCHA_V3_ENTERPRISE_TARGET_URL")
 CALLBACK_NAME = os.getenv("RECAPTCHA_V3_ENTERPRISE_CALLBACK_NAME", "verifyRecaptcha")
-SUCCESS_SELECTOR = os.getenv(
-    "RECAPTCHA_V3_ENTERPRISE_SUCCESS_SELECTOR",
-    ".recaptcha-success, p.successMessage",
+SUCCESS_SELECTOR = (
+    os.getenv(
+        "RECAPTCHA_V3_ENTERPRISE_SUCCESS_SELECTOR",
+        "",
+    )
+    or "p[class*='successMessage'], [role='alert']"
 )
 MINIMUM_SCORE = 0.3
 
@@ -77,7 +80,8 @@ def main() -> None:
             raise RuntimeError("Solver returned an empty Enterprise token")
 
         # STEP-04: Deliver the returned token to the configured callback.
-        # Token injection and submission are site-specific; adapt this step to the target page.
+        # This page exposes an async callback that verifies the supplied token server-side and
+        # then renders either a success message with JSON details or an error alert.
         driver.execute_script(
             """
             const callbackName = arguments[0];
@@ -95,7 +99,22 @@ def main() -> None:
         print(f"Enterprise token sent to callback {CALLBACK_NAME}")
 
         # STEP-05: Require the page's explicit success signal.
-        print(wait_for_css(driver, SUCCESS_SELECTOR).text)
+        result = wait_for_css(driver, SUCCESS_SELECTOR)
+        message = result.text.strip()
+        if not message:
+            raise RuntimeError("The Enterprise page returned an empty result message")
+        result_class = (result.get_attribute("class") or "").lower()
+        result_role = (result.get_attribute("role") or "").lower()
+        if result_role == "alert" or "error" in result_class:
+            raise RuntimeError(f"The Enterprise page rejected the token: {message}")
+
+        result_container = result.find_element("xpath", "..")
+        result_details = result_container.text.strip()
+        if '"success": true' not in result_details:
+            raise RuntimeError(
+                "The Enterprise page did not confirm success in its verification response"
+            )
+        print(f"Page confirmation:\n{result_details}")
         time.sleep(5)
 
 
