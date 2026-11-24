@@ -20,13 +20,18 @@ How it works:
 
 import base64
 import struct
+import sys
 import time
+from pathlib import Path
 
 from captcha_solver_api.tasks import CoordinatesTask
 from selenium.webdriver import ActionChains
 from seleniumbase import Driver
 
-from examples.common import (
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from examples.common import (  # noqa: E402
     create_client,
     logged_example,
     required_env,

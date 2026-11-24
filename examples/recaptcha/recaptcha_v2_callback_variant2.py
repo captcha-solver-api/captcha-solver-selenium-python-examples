@@ -17,13 +17,18 @@ How it works:
     STEP-05 - Require the demo page's explicit success message.
 """
 
+import sys
 import time
+from pathlib import Path
 
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import create_client, logged_example, required_env, show_success
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from examples.common import create_client, logged_example, required_env, show_success  # noqa: E402
 
 URL = required_env("TARGET_URL")
 

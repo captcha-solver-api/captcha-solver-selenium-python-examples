@@ -17,11 +17,15 @@ How it works:
 """
 
 import base64
+import sys
 from pathlib import Path
 
 from captcha_solver_api.tasks import YandexSmartCaptchaKaleidoscopeTask
 
-from examples.common import create_client
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from examples.common import create_client  # noqa: E402
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 IMAGE_PATH = REPOSITORY_ROOT / "assets" / "yandex" / "yandex-smartcaptcha-kaleidoscope.jpg"

@@ -18,12 +18,17 @@ How it works:
 """
 
 import os
+import sys
 import time
+from pathlib import Path
 
 from captcha_solver_api.tasks import RecaptchaV2TaskProxyless
 from seleniumbase import Driver
 
-from examples.common import (
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from examples.common import (  # noqa: E402
     create_client,
     fill_response_field,
     logged_example,

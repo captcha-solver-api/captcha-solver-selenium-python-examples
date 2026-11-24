@@ -20,7 +20,9 @@ How it works:
 """
 
 import os
+import sys
 import time
+from pathlib import Path
 
 from captcha_solver_api.tasks import TencentTaskProxyless
 from selenium.webdriver.common.by import By
@@ -28,7 +30,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import create_client, logged_example, required_env, wait_for_css
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from examples.common import create_client, logged_example, required_env, wait_for_css  # noqa: E402
 
 TENCENT_INTERCEPT_SCRIPT = r"""
 (() => {

@@ -17,13 +17,18 @@ How it works:
     STEP-05 - Verify page acceptance independently of SDK completion.
 """
 
+import sys
 import time
+from pathlib import Path
 
 from captcha_solver_api.tasks import RecaptchaV3TaskProxyless
 from selenium.webdriver.support.ui import WebDriverWait
 from seleniumbase import Driver
 
-from examples.common import (
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from examples.common import (  # noqa: E402
     create_client,
     logged_example,
     required_env,
