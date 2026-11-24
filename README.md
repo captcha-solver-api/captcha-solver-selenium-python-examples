@@ -76,7 +76,6 @@ are authorized to test. `TARGET_URL` remains available as a generic fallback.
 | reCAPTCHA v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha/recaptcha_v2_callback.py) |
 | reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
 | reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
-| reCAPTCHA v3 interception | [`recaptcha_v3_extended_js_script.py`](examples/recaptcha/recaptcha_v3_extended_js_script.py) |
 | Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare/cloudflare_turnstile.py) |
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
