@@ -48,6 +48,14 @@ CAPTCHA_SOLVE_TIMEOUT=300
 `CAPTCHA_SOLVE_TIMEOUT` controls how many seconds `CaptchaClient.solve()` waits while polling.
 The examples default to 300 seconds when the variable is omitted.
 
+The callback reCAPTCHA v2 example needs its own page integration settings:
+
+```dotenv
+RECAPTCHA_V2_CALLBACK_TARGET_URL=https://example.com/page_with_recaptcha_v2_callback
+RECAPTCHA_V2_CALLBACK_NAME=verifyRecaptcha
+RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR=.verification-success
+```
+
 ## Run
 
 ```bash

@@ -34,12 +34,13 @@ from examples.common import (  # noqa: E402
     proxy_settings,
     required_env,
     selenium_proxy,
-    show_success,
-    wait_for_xpath,
+    wait_for_css,
 )
 
-URL = required_env("RECAPTCHA_V2_TARGET_URL", "TARGET_URL")
-SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
+URL = required_env("RECAPTCHA_V2_CALLBACK_TARGET_URL")
+CALLBACK_NAME = required_env("RECAPTCHA_V2_CALLBACK_NAME")
+SUCCESS_SELECTOR = required_env("RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR")
+SITEKEY_SELECTOR = "[data-sitekey]"
 
 
 @logged_example
@@ -52,13 +53,15 @@ def main() -> None:
         # STEP-02: Open the page through the proxy and extract its site key.
         driver.get(URL)
         try:
-            sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
+            sitekey = wait_for_css(driver, SITEKEY_SELECTOR).get_attribute("data-sitekey")
         except TimeoutException as exc:
             raise RuntimeError(
                 "The target page did not load through the configured proxy. "
                 "Check the proxy address, credentials, and availability."
             ) from exc
-        print("Got the callback function name and site key")
+        if not sitekey:
+            raise RuntimeError("No reCAPTCHA sitekey found on the callback page")
+        print(f"Sitekey received: {sitekey}; callback: {CALLBACK_NAME}")
         # STEP-03: Create and solve the task through the same proxy.
         solution = client.solve(
             RecaptchaV2Task(
@@ -71,12 +74,22 @@ def main() -> None:
         # STEP-04: Deliver the token to this demo's callback.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
-            "window.verifyDemoRecaptcha(arguments[0]);",
+            """
+            const callbackName = arguments[0];
+            const callback = callbackName
+              .split('.')
+              .reduce((value, key) => value?.[key], window);
+            if (typeof callback !== 'function') {
+              throw new Error(`Callback ${callbackName} was not found`);
+            }
+            callback(arguments[1]);
+            """,
+            CALLBACK_NAME,
             solution["gRecaptchaResponse"],
         )
-        print("The token is sent to the callback function")
+        print(f"The token is sent to callback {CALLBACK_NAME}")
         # STEP-05: Verify successful callback handling on the page.
-        show_success(driver)
+        print(wait_for_css(driver, SUCCESS_SELECTOR).text)
         time.sleep(5)
 
 

@@ -31,12 +31,13 @@ from examples.common import (  # noqa: E402
     create_client,
     logged_example,
     required_env,
-    show_success,
-    wait_for_xpath,
+    wait_for_css,
 )
 
-URL = required_env("RECAPTCHA_V2_TARGET_URL", "TARGET_URL")
-SITEKEY_LOCATOR = "//div[@id='g-recaptcha']"
+URL = required_env("RECAPTCHA_V2_CALLBACK_TARGET_URL")
+CALLBACK_NAME = required_env("RECAPTCHA_V2_CALLBACK_NAME")
+SUCCESS_SELECTOR = required_env("RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR")
+SITEKEY_SELECTOR = "[data-sitekey]"
 
 
 @logged_example
@@ -45,19 +46,31 @@ def main() -> None:
     with Driver(browser="chrome", headless=False) as driver, create_client() as client:
         # STEP-02: Open the configured page and read its widget site key.
         driver.get(URL)
-        sitekey = wait_for_xpath(driver, SITEKEY_LOCATOR).get_attribute("data-sitekey")
+        sitekey = wait_for_css(driver, SITEKEY_SELECTOR).get_attribute("data-sitekey")
+        if not sitekey:
+            raise RuntimeError("No reCAPTCHA sitekey found on the callback page")
         print(f"Sitekey received: {sitekey}")
         # STEP-03: Create and solve the proxyless reCAPTCHA task.
         solution = client.solve(RecaptchaV2TaskProxyless(websiteURL=URL, websiteKey=sitekey))
         # STEP-04: Pass the token to the callback registered by this demo page.
         # Token injection and submission are site-specific; adapt this step to the target page.
         driver.execute_script(
-            "window.verifyDemoRecaptcha(arguments[0]);",
+            """
+            const callbackName = arguments[0];
+            const callback = callbackName
+              .split('.')
+              .reduce((value, key) => value?.[key], window);
+            if (typeof callback !== 'function') {
+              throw new Error(`Callback ${callbackName} was not found`);
+            }
+            callback(arguments[1]);
+            """,
+            CALLBACK_NAME,
             solution["gRecaptchaResponse"],
         )
-        print("The token is sent to the callback function")
+        print(f"The token is sent to callback {CALLBACK_NAME}")
         # STEP-05: Confirm that the page handled the callback successfully.
-        show_success(driver)
+        print(wait_for_css(driver, SUCCESS_SELECTOR).text)
         time.sleep(5)
 
 
