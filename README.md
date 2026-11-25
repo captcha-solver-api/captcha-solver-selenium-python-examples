@@ -249,6 +249,11 @@ python -m ruff format --check .
 - [Cloudflare Turnstile Puppeteer demo](https://github.com/captcha-solver-api/cloudflare-turnstile-puppeteer-demo)
 - [Tencent CAPTCHA automation guide](https://github.com/captcha-solver-api/How-to-Automate-Tencent-CAPTCHA)
 
+## Security
+
+Report vulnerabilities privately as described in the [security policy](SECURITY.md). Never post
+API keys, proxy credentials, cookies, or paid task results in a public issue.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE.md).
