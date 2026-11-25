@@ -1,11 +1,17 @@
-![Captcha Solver Selenium Python Examples](assets/selenium-python-examples-banner.png)
-
 # Captcha solving examples with Python and SeleniumBase
+
+![Captcha Solver Selenium Python Examples](assets/selenium-python-examples-banner.png)
 
 Examples of solving popular captcha types with
 [`captcha-solver-api`](https://pypi.org/project/captcha-solver-api/),
 [Selenium](https://www.selenium.dev/), and
 [`seleniumbase`](https://seleniumbase.io/).
+
+Use the examples only on public demo pages or websites you own or are authorized to test.
+
+> [!IMPORTANT]
+> Every example creates a paid CAPTCHA task. Run it only with an API key you are authorized to use.
+> A returned SDK solution does not by itself prove that the target page accepted the solution.
 
 The browser examples show how to:
 
@@ -19,7 +25,7 @@ The image, coordinates, and captured Yandex challenge examples instead read test
 `assets/`, submit them to the API, and print recognized text, coordinates, or the required number
 of slider-arrow clicks. They do not open a browser.
 
-## Installation
+## Install
 
 Requirements:
 
@@ -57,45 +63,8 @@ CAPTCHA_SOLVE_TIMEOUT=300
 ```
 
 `CAPTCHA_SOLVE_TIMEOUT` controls how many seconds `CaptchaClient.solve()` waits while polling.
-The examples default to 300 seconds when the variable is omitted.
-
-> [!IMPORTANT]
-> Every example calls `CaptchaClient.solve()` and creates a paid CAPTCHA task. A returned SDK
-> solution means that the service solved the task; it does not by itself prove that the target
-> page accepted the solution.
-
-The callback reCAPTCHA v2 example needs its own page integration settings:
-
-```dotenv
-RECAPTCHA_V2_CALLBACK_TARGET_URL=https://example.com/page_with_recaptcha_v2_callback
-RECAPTCHA_V2_CALLBACK_NAME=verifyRecaptcha
-RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR=.captcha-success
-```
-
-The `.env.example` file contains official public demo URLs for reCAPTCHA v2 and Yandex
-SmartCaptcha. All URLs ending in `.example` are intentionally non-working placeholders. Replace
-them with pages you own or are authorized to test before running the matching examples.
-
-The examples load `.env` automatically through `python-dotenv`. The available target settings
-are:
-
-| Variable | Used by |
-|---|---|
-| `RECAPTCHA_V2_TARGET_URL` | reCAPTCHA v2 proxyless and proxy examples |
-| `RECAPTCHA_V2_CALLBACK_TARGET_URL` | reCAPTCHA v2 callback examples |
-| `RECAPTCHA_V2_ENTERPRISE_TARGET_URL` | reCAPTCHA v2 Enterprise |
-| `RECAPTCHA_V3_TARGET_URL` | reCAPTCHA v3 |
-| `RECAPTCHA_V3_ENTERPRISE_TARGET_URL` | reCAPTCHA v3 Enterprise |
-| `TURNSTILE_TARGET_URL` | Cloudflare Turnstile widget |
-| `TURNSTILE_CHALLENGE_TARGET_URL` | Cloudflare Challenge page |
-| `GEETEST_V3_TARGET_URL` | GeeTest v3 |
-| `GEETEST_V4_TARGET_URL` | GeeTest v4 |
-| `TENCENT_TARGET_URL` | Tencent CAPTCHA |
-| `YANDEX_TARGET_URL` | Yandex SmartCaptcha browser example |
-
-Some examples also accept `TARGET_URL` as an optional generic fallback. Changing only a URL does
-not adapt page-specific selectors, callbacks, initialization endpoints, solution fields, or
-acceptance checks. Inspect and update those details for the target page.
+The examples default to 300 seconds when the variable is omitted. They load `.env` automatically;
+keep that file private because it contains credentials and is ignored by Git.
 
 ## Run
 
@@ -180,6 +149,33 @@ tasks that do not browse a target page.
 | Image captcha, math | `ImageToTextTask` | Not applicable | [`image_to_text_math.py`](examples/image/image_to_text_math.py) |
 | Coordinates | `CoordinatesTask` | Not applicable | [`coordinates.py`](examples/coordinates/coordinates.py) |
 
+## Target pages
+
+The `.env.example` file contains official public demo URLs for reCAPTCHA v2 and Yandex
+SmartCaptcha. URLs ending in `.example` are intentionally non-working placeholders. Replace them
+with pages you own or are authorized to test before running the matching examples.
+
+| Variable | Used by |
+|---|---|
+| `RECAPTCHA_V2_TARGET_URL` | reCAPTCHA v2 proxyless and proxy examples |
+| `RECAPTCHA_V2_CALLBACK_TARGET_URL` | reCAPTCHA v2 callback examples |
+| `RECAPTCHA_V2_ENTERPRISE_TARGET_URL` | reCAPTCHA v2 Enterprise |
+| `RECAPTCHA_V3_TARGET_URL` | reCAPTCHA v3 |
+| `RECAPTCHA_V3_ENTERPRISE_TARGET_URL` | reCAPTCHA v3 Enterprise |
+| `TURNSTILE_TARGET_URL` | Cloudflare Turnstile widget |
+| `TURNSTILE_CHALLENGE_TARGET_URL` | Cloudflare Challenge page |
+| `GEETEST_V3_TARGET_URL` | GeeTest v3 |
+| `GEETEST_V4_TARGET_URL` | GeeTest v4 |
+| `TENCENT_TARGET_URL` | Tencent CAPTCHA |
+| `YANDEX_TARGET_URL` | Yandex SmartCaptcha browser example |
+
+The callback reCAPTCHA v2 examples additionally use `RECAPTCHA_V2_CALLBACK_NAME` and
+`RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR`. Some examples accept `TARGET_URL` as a generic fallback.
+
+> [!IMPORTANT]
+> Changing only a URL does not adapt page-specific selectors, callbacks, initialization
+> endpoints, solution fields, or acceptance checks. Review those details for the target page.
+
 ## SDK solution and page acceptance
 
 `CaptchaClient.solve(task)` creates the task, polls it, and returns the `solution` object rather
@@ -228,7 +224,7 @@ PROXY_PASSWORD=
 
 The browser and API task use the same proxy.
 
-## Checks
+## Quality checks
 
 ```bash
 python -m pip install ruff
@@ -253,6 +249,19 @@ python -m ruff format --check .
 
 Report vulnerabilities privately as described in the [security policy](SECURITY.md). Never post
 API keys, proxy credentials, cookies, or paid task results in a public issue.
+
+## Troubleshooting
+
+Run commands from the repository root. The scripts add that root to Python's import path and load
+`.env` automatically, so no PowerShell environment-import command is required.
+
+`Set ... in the environment or .env file` means that the required value is absent or empty.
+Copy `.env.example` to `.env`, set `CAPTCHA_API_KEY`, and replace the matching `.example` target
+before retrying.
+
+`CaptchaTimeoutError` means the task was not solved within `CAPTCHA_SOLVE_TIMEOUT`; it may still
+finish later. `ERROR_CAPTCHA_UNSOLVABLE` is a solver result rather than a Selenium setup error and
+can be retried with fresh dynamic parameters where the CAPTCHA type requires them.
 
 ## License
 
