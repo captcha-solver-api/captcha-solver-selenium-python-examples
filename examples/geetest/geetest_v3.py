@@ -101,10 +101,10 @@ def main() -> None:
         result_role = (result.get_attribute("role") or "").lower()
         if result_role == "alert":
             raise RuntimeError(f"The page rejected the GeeTest v3 solution: {message}")
-        details = result.find_element("xpath", "..").text.strip()
+        details = result.find_element("xpath", "following-sibling::pre[1]").text.strip()
         if '"success": true' not in details:
             raise RuntimeError("The page did not confirm GeeTest v3 verification success")
-        print(f"Page confirmation:\n{details}")
+        print(f"Page confirmation: {message}\n{details}")
         time.sleep(5)
 
 
