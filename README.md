@@ -179,38 +179,36 @@ The callback reCAPTCHA v2 examples additionally use `RECAPTCHA_V2_CALLBACK_NAME`
 ## SDK solution and page acceptance
 
 `CaptchaClient.solve(task)` creates the task, polls it, and returns the `solution` object rather
-than the complete transport response. Fields depend on the task type. For example, GeeTest v3
-returns:
+than the complete transport response. The fields and the way they must be applied depend on the
+CAPTCHA type and the target page.
 
-```json
-{
-  "challenge": "...",
-  "validate": "...",
-  "seccode": "..."
-}
-```
+> [!IMPORTANT]
+> There is no universal way to submit a CAPTCHA solution. Before adapting an example, inspect the
+> target page's widget initialization, hidden fields, callbacks, form submission, network requests,
+> and success response. The examples implement only the flow used by their configured demo pages;
+> users must adapt extraction, solution delivery, and acceptance checks for their own pages.
 
-GeeTest v4 returns all fields that must be applied together:
-
-```json
-{
-  "captcha_id": "...",
-  "lot_number": "...",
-  "pass_token": "...",
-  "gen_time": "...",
-  "captcha_output": "..."
-}
-```
+| CAPTCHA type | SDK solution | What the example does | Acceptance check |
+|---|---|---|---|
+| reCAPTCHA v2, including Enterprise and proxy variants | `gRecaptchaResponse` | Writes the token to the page response field or invokes the configured callback, then submits when required | Requires the configured page success state |
+| reCAPTCHA v3, including Enterprise | `gRecaptchaResponse` | Delivers the token through the action or page integration used by that example | Requires the page's verification result |
+| Cloudflare Turnstile widget | `token` | Writes `cf-turnstile-response` and submits the form | Requires the page success message |
+| Cloudflare Challenge page | `token` | Invokes the callback captured from the page's Turnstile render options | Requires the page success message |
+| GeeTest v3 | `challenge`, `validate`, `seccode` | Writes all three values to the matching form fields and submits | Requires a successful verification response |
+| GeeTest v4 | `captcha_id`, `lot_number`, `pass_token`, `gen_time`, `captcha_output` | Returns all five values through the widget validation integration and submits | Requires a successful verification response |
+| Tencent CAPTCHA | `ticket`, `randstr` | Delivers both values to the original page callback | Confirms callback delivery; server-side acceptance requires a page-specific check |
+| Yandex SmartCaptcha | `token` | Writes `smart-token` and submits the form | Requires the official demo success response |
+| Yandex SmartCaptcha image | `coordinates` | Prints ordered image-space click points | Not applicable; the user must click the original challenge and verify it |
+| Yandex SmartCaptcha Kaleidoscope | click count | Prints the number of required slider-arrow clicks | Not applicable; the user must apply the clicks and verify the challenge |
+| Image to text, digits, and math | `text` | Prints the recognized text, digits, or calculated result | Not applicable; the user must submit it to the source page and verify it |
+| Coordinates | `coordinates` | Prints image-space click points | Not applicable; the user must scale and click them on the source challenge |
 
 GeeTest v3 `challenge` values are dynamic and single-use. The v3 example requests a fresh pair
 from the configured target's initialization endpoint before opening the widget. Adapt that
 endpoint when using a different page.
 
-> [!IMPORTANT]
-> Do not treat either object as page acceptance. Browser examples continue by applying the
-> solution and checking an explicit page result where available. The Tencent example can confirm
-> delivery of `ticket` and `randstr` to the original callback, but that alone is not proof of
-> server-side acceptance.
+Receiving a solution from the SDK proves only that the solver task completed. It does not prove
+that the target accepted the response; rely on an explicit page or server result instead.
 
 ## Proxy
 
