@@ -41,7 +41,7 @@ from examples.common import (  # noqa: E402
 URL = (
     os.getenv("YANDEX_TARGET_URL")
     or os.getenv("TARGET_URL")
-    or "https://smartcaptcha.cloud.yandex.ru/demo"
+    or "https://captcha-api.yandex.ru/demo"
 )
 SITEKEY_SELECTOR = ".smart-captcha[data-sitekey]"
 SUBMIT_LOCATOR = "//*[@id='smartcaptcha-demo-submit']"

@@ -152,8 +152,8 @@ tasks that do not browse a target page.
 ## Target pages
 
 The `.env.example` file contains official public demo URLs for reCAPTCHA v2 and Yandex
-SmartCaptcha. URLs ending in `.example` are intentionally non-working placeholders. Replace them
-with pages you own or are authorized to test before running the matching examples.
+SmartCaptcha. URLs under `example.com/page_with_...` are intentionally non-working placeholders.
+Replace them with pages you own or are authorized to test before running the matching examples.
 
 | Variable | Used by |
 |---|---|
@@ -259,8 +259,8 @@ Run commands from the repository root. The scripts add that root to Python's imp
 `.env` automatically, so no PowerShell environment-import command is required.
 
 `Set ... in the environment or .env file` means that the required value is absent or empty.
-Copy `.env.example` to `.env`, set `CAPTCHA_API_KEY`, and replace the matching `.example` target
-before retrying.
+Copy `.env.example` to `.env`, set `CAPTCHA_API_KEY`, and replace the matching `example.com`
+target before retrying.
 
 `CaptchaTimeoutError` means the task was not solved within `CAPTCHA_SOLVE_TIMEOUT`; it may still
 finish later. `ERROR_CAPTCHA_UNSOLVABLE` is a solver result rather than a Selenium setup error and
