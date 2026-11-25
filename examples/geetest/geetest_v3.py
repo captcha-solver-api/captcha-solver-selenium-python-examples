@@ -107,6 +107,7 @@ def main() -> None:
         except TimeoutException:
             print("Target page load timed out; continuing with the initialized content")
         for name in required_fields:
+            wait_for_css(driver, f"[name='geetest_{name}']")
             fill_response_field(driver, f"geetest_{name}", solution[name])
         submit = wait_for_xpath(driver, SUBMIT_LOCATOR)
         driver.execute_script("arguments[0].click();", submit)
