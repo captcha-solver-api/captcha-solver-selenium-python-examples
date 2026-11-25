@@ -59,6 +59,11 @@ CAPTCHA_SOLVE_TIMEOUT=300
 `CAPTCHA_SOLVE_TIMEOUT` controls how many seconds `CaptchaClient.solve()` waits while polling.
 The examples default to 300 seconds when the variable is omitted.
 
+> [!IMPORTANT]
+> Every example calls `CaptchaClient.solve()` and creates a paid CAPTCHA task. A returned SDK
+> solution means that the service solved the task; it does not by itself prove that the target
+> page accepted the solution.
+
 The callback reCAPTCHA v2 example needs its own page integration settings:
 
 ```dotenv
@@ -70,6 +75,27 @@ RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR=.captcha-success
 The `.env.example` file contains official public demo URLs for reCAPTCHA v2 and Yandex
 SmartCaptcha. All URLs ending in `.example` are intentionally non-working placeholders. Replace
 them with pages you own or are authorized to test before running the matching examples.
+
+The examples load `.env` automatically through `python-dotenv`. The available target settings
+are:
+
+| Variable | Used by |
+|---|---|
+| `RECAPTCHA_V2_TARGET_URL` | reCAPTCHA v2 proxyless and proxy examples |
+| `RECAPTCHA_V2_CALLBACK_TARGET_URL` | reCAPTCHA v2 callback examples |
+| `RECAPTCHA_V2_ENTERPRISE_TARGET_URL` | reCAPTCHA v2 Enterprise |
+| `RECAPTCHA_V3_TARGET_URL` | reCAPTCHA v3 |
+| `RECAPTCHA_V3_ENTERPRISE_TARGET_URL` | reCAPTCHA v3 Enterprise |
+| `TURNSTILE_TARGET_URL` | Cloudflare Turnstile widget |
+| `TURNSTILE_CHALLENGE_TARGET_URL` | Cloudflare Challenge page |
+| `GEETEST_V3_TARGET_URL` | GeeTest v3 |
+| `GEETEST_V4_TARGET_URL` | GeeTest v4 |
+| `TENCENT_TARGET_URL` | Tencent CAPTCHA |
+| `YANDEX_TARGET_URL` | Yandex SmartCaptcha browser example |
+
+Some examples also accept `TARGET_URL` as an optional generic fallback. Changing only a URL does
+not adapt page-specific selectors, callbacks, initialization endpoints, solution fields, or
+acceptance checks. Inspect and update those details for the target page.
 
 ## Run
 
@@ -130,27 +156,63 @@ examples additionally require the `PROXY_*` variables from `.env`.
 
 ## Examples
 
-| Captcha | File |
-|---|---|
-| reCAPTCHA v2 | [`recaptcha_v2.py`](examples/recaptcha/recaptcha_v2.py) |
-| reCAPTCHA v2 Enterprise | [`recaptcha_v2_enterprise.py`](examples/recaptcha/recaptcha_v2_enterprise.py) |
-| reCAPTCHA v2 + proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha/recaptcha_v2_proxy.py) |
-| reCAPTCHA v2 callback | [`recaptcha_v2_callback.py`](examples/recaptcha/recaptcha_v2_callback.py) |
-| reCAPTCHA v2 callback + proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
-| reCAPTCHA v3 | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
-| reCAPTCHA v3 Enterprise | [`recaptcha_v3_enterprise.py`](examples/recaptcha/recaptcha_v3_enterprise.py) |
-| Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare/cloudflare_turnstile.py) |
-| Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
-| GeeTest v3 | [`geetest_v3.py`](examples/geetest/geetest_v3.py) |
-| GeeTest v4 | [`geetest_v4.py`](examples/geetest/geetest_v4.py) |
-| Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
-| Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
-| Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
-| Yandex SmartCaptcha Kaleidoscope | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex/yandex_smartcaptcha_kaleidoscope.py) |
-| Image captcha, text | [`image_to_text.py`](examples/image/image_to_text.py) |
-| Image captcha, digits | [`image_to_text_digits.py`](examples/image/image_to_text_digits.py) |
-| Image captcha, math | [`image_to_text_math.py`](examples/image/image_to_text_math.py) |
-| Coordinates | [`coordinates.py`](examples/coordinates/coordinates.py) |
+`Proxyless` means that the service solves without a user-supplied proxy. `Proxy` means that the
+browser and task use the configured `PROXY_*` settings. `Not applicable` is used for image-based
+tasks that do not browse a target page.
+
+| Captcha | SDK task class | Proxy status | File |
+|---|---|---|---|
+| reCAPTCHA v2 | `RecaptchaV2TaskProxyless` | Proxyless | [`recaptcha_v2.py`](examples/recaptcha/recaptcha_v2.py) |
+| reCAPTCHA v2 Enterprise | `RecaptchaV2EnterpriseTaskProxyless` | Proxyless | [`recaptcha_v2_enterprise.py`](examples/recaptcha/recaptcha_v2_enterprise.py) |
+| reCAPTCHA v2 + proxy | `RecaptchaV2Task` | Proxy | [`recaptcha_v2_proxy.py`](examples/recaptcha/recaptcha_v2_proxy.py) |
+| reCAPTCHA v2 callback | `RecaptchaV2TaskProxyless` | Proxyless | [`recaptcha_v2_callback.py`](examples/recaptcha/recaptcha_v2_callback.py) |
+| reCAPTCHA v2 callback + proxy | `RecaptchaV2Task` | Proxy | [`recaptcha_v2_callback_proxy.py`](examples/recaptcha/recaptcha_v2_callback_proxy.py) |
+| reCAPTCHA v3 | `RecaptchaV3TaskProxyless` | Proxyless | [`recaptcha_v3.py`](examples/recaptcha/recaptcha_v3.py) |
+| reCAPTCHA v3 Enterprise | `RecaptchaV3TaskProxyless` | Proxyless | [`recaptcha_v3_enterprise.py`](examples/recaptcha/recaptcha_v3_enterprise.py) |
+| Cloudflare Turnstile | `TurnstileTaskProxyless` | Proxyless | [`cloudflare_turnstile.py`](examples/cloudflare/cloudflare_turnstile.py) |
+| Cloudflare Challenge | `TurnstileTaskProxyless` | Proxyless | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
+| GeeTest v3 | `GeeTestTaskProxyless` | Proxyless | [`geetest_v3.py`](examples/geetest/geetest_v3.py) |
+| GeeTest v4 | `GeeTestTaskProxyless` | Proxyless | [`geetest_v4.py`](examples/geetest/geetest_v4.py) |
+| Tencent CAPTCHA | `TencentTaskProxyless` | Proxyless | [`tencent.py`](examples/tencent/tencent.py) |
+| Yandex SmartCaptcha | `YandexSmartCaptchaTaskProxyless` | Proxyless | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
+| Yandex SmartCaptcha image | `YandexSmartCaptchaImageTask` | Not applicable | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
+| Yandex SmartCaptcha Kaleidoscope | `YandexSmartCaptchaKaleidoscopeTask` | Not applicable | [`yandex_smartcaptcha_kaleidoscope.py`](examples/yandex/yandex_smartcaptcha_kaleidoscope.py) |
+| Image captcha, text | `ImageToTextTask` | Not applicable | [`image_to_text.py`](examples/image/image_to_text.py) |
+| Image captcha, digits | `ImageToTextTask` | Not applicable | [`image_to_text_digits.py`](examples/image/image_to_text_digits.py) |
+| Image captcha, math | `ImageToTextTask` | Not applicable | [`image_to_text_math.py`](examples/image/image_to_text_math.py) |
+| Coordinates | `CoordinatesTask` | Not applicable | [`coordinates.py`](examples/coordinates/coordinates.py) |
+
+## SDK solution and page acceptance
+
+`CaptchaClient.solve(task)` creates the task, polls it, and returns the `solution` object rather
+than the complete transport response. Fields depend on the task type. For example, GeeTest v3
+returns:
+
+```json
+{
+  "challenge": "...",
+  "validate": "...",
+  "seccode": "..."
+}
+```
+
+GeeTest v4 returns all fields that must be applied together:
+
+```json
+{
+  "captcha_id": "...",
+  "lot_number": "...",
+  "pass_token": "...",
+  "gen_time": "...",
+  "captcha_output": "..."
+}
+```
+
+> [!IMPORTANT]
+> Do not treat either object as page acceptance. Browser examples continue by applying the
+> solution and checking an explicit page result where available. The Tencent example can confirm
+> delivery of `ticket` and `randstr` to the original callback, but that alone is not proof of
+> server-side acceptance.
 
 ## GeeTest
 
