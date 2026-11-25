@@ -31,6 +31,11 @@ Requirements:
 git clone https://github.com/captcha-solver-api/captcha-solver-selenium-python-examples.git
 cd captcha-solver-selenium-python-examples
 python -m venv .venv
+```
+
+On macOS and Linux:
+
+```bash
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 cp .env.example .env
@@ -40,6 +45,7 @@ On Windows:
 
 ```powershell
 .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
@@ -81,11 +87,16 @@ python examples/recaptcha/recaptcha_v3.py
 python examples/recaptcha/recaptcha_v3_enterprise.py
 ```
 
-Cloudflare and Tencent:
+Cloudflare:
 
 ```bash
 python examples/cloudflare/cloudflare_turnstile.py
 python examples/cloudflare/cloudflare_challenge_page.py
+```
+
+Tencent:
+
+```bash
 python examples/tencent/tencent.py
 ```
 
