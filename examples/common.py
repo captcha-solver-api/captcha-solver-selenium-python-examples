@@ -45,7 +45,7 @@ def logged_example(function):
             result = function(*args, **kwargs)
         except Exception as error:
             print(f"An error occurred: {error}")
-            print("Failed to solve captcha")
+            print("Example failed; check the traceback to identify the failed stage")
             raise
         print("Finished")
         return result
@@ -53,15 +53,27 @@ def logged_example(function):
     return wrapper
 
 
-def required_env(name: str) -> str:
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"Set {name} in the environment or .env file")
-    return value
+def required_env(*names: str) -> str:
+    """Return the first configured variable, allowing specific-to-generic fallbacks."""
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    expected = " or ".join(names)
+    raise RuntimeError(f"Set {expected} in the environment or .env file")
 
 
 def create_client() -> CaptchaClient:
-    return ConsoleCaptchaClient(required_env("CAPTCHA_API_KEY"))
+    # SDK debug output includes sanitized task payloads, task IDs, polling updates,
+    # request timing, and the final poll count without exposing credentials or images.
+    solve_timeout = int(os.getenv("CAPTCHA_SOLVE_TIMEOUT", "300"))
+    if solve_timeout <= 0:
+        raise RuntimeError("CAPTCHA_SOLVE_TIMEOUT must be a positive number of seconds")
+    return ConsoleCaptchaClient(
+        required_env("CAPTCHA_API_KEY"),
+        timeout=solve_timeout,
+        debug=True,
+    )
 
 
 def wait_for_css(driver, selector: str, timeout: int = 30):
