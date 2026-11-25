@@ -29,7 +29,7 @@ of slider-arrow clicks. They do not open a browser.
 
 Requirements:
 
-- Python 3.10 or newer
+- Python 3.9 or newer
 - Google Chrome for browser-based examples
 - A Captcha Solver API key with a positive balance
 
