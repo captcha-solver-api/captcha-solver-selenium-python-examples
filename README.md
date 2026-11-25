@@ -7,19 +7,24 @@ Examples of solving popular captcha types with
 [Selenium](https://www.selenium.dev/), and
 [`seleniumbase`](https://seleniumbase.io/).
 
-Each example shows how to:
+The browser examples show how to:
 
 1. Open a page and collect captcha parameters.
 2. Send a task to Captcha Solver.
 3. Apply the solution in the browser.
-4. Check that the page accepted the solution.
+4. Check that the page accepted the solution when it exposes a verification result, or confirm
+   delivery to the page callback when it does not.
+
+The image, coordinates, and captured Yandex challenge examples instead read test images from
+`assets/`, submit them to the API, and print recognized text, coordinates, or the required number
+of slider-arrow clicks. They do not open a browser.
 
 ## Installation
 
 Requirements:
 
-- Python 3.9 or newer
-- Google Chrome
+- Python 3.10 or newer
+- Google Chrome for browser-based examples
 - A Captcha Solver API key with a positive balance
 
 ```bash
@@ -53,19 +58,64 @@ The callback reCAPTCHA v2 example needs its own page integration settings:
 ```dotenv
 RECAPTCHA_V2_CALLBACK_TARGET_URL=https://example.com/page_with_recaptcha_v2_callback
 RECAPTCHA_V2_CALLBACK_NAME=verifyRecaptcha
-RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR=.verification-success
+RECAPTCHA_V2_CALLBACK_SUCCESS_SELECTOR=.captcha-success
 ```
+
+The `.env.example` file contains official public demo URLs for reCAPTCHA v2 and Yandex
+SmartCaptcha. All URLs ending in `.example` are intentionally non-working placeholders. Replace
+them with pages you own or are authorized to test before running the matching examples.
 
 ## Run
 
+Run commands from the repository root.
+
+reCAPTCHA:
+
 ```bash
 python examples/recaptcha/recaptcha_v2.py
+python examples/recaptcha/recaptcha_v2_proxy.py
+python examples/recaptcha/recaptcha_v2_callback.py
+python examples/recaptcha/recaptcha_v2_callback_proxy.py
+python examples/recaptcha/recaptcha_v2_enterprise.py
+python examples/recaptcha/recaptcha_v3.py
+python examples/recaptcha/recaptcha_v3_enterprise.py
 ```
 
-The reCAPTCHA v2 example uses the official Google demo by default, and the
-Yandex SmartCaptcha example uses the official Yandex demo. Set the matching
-`*_TARGET_URL` variable in `.env` to run another example against a page you
-are authorized to test. `TARGET_URL` remains available as a generic fallback.
+Cloudflare and Tencent:
+
+```bash
+python examples/cloudflare/cloudflare_turnstile.py
+python examples/cloudflare/cloudflare_challenge_page.py
+python examples/tencent/tencent.py
+```
+
+GeeTest:
+
+```bash
+python examples/geetest/geetest_v3.py
+python examples/geetest/geetest_v4.py
+```
+
+Yandex SmartCaptcha:
+
+```bash
+python examples/yandex/yandex_smartcaptcha.py
+python examples/yandex/yandex_smartcaptcha_image.py
+python examples/yandex/yandex_smartcaptcha_kaleidoscope.py
+```
+
+Local image and coordinates tasks:
+
+```bash
+python examples/image/image_to_text.py
+python examples/image/image_to_text_digits.py
+python examples/image/image_to_text_math.py
+python examples/coordinates/coordinates.py
+```
+
+The reCAPTCHA v2 and Yandex SmartCaptcha browser examples use their official demos by default.
+Set the matching `*_TARGET_URL` variable to use another page you are authorized to test. Proxy
+examples additionally require the `PROXY_*` variables from `.env`.
 
 ## Examples
 
@@ -80,6 +130,8 @@ are authorized to test. `TARGET_URL` remains available as a generic fallback.
 | reCAPTCHA v3 Enterprise | [`recaptcha_v3_enterprise.py`](examples/recaptcha/recaptcha_v3_enterprise.py) |
 | Cloudflare Turnstile | [`cloudflare_turnstile.py`](examples/cloudflare/cloudflare_turnstile.py) |
 | Cloudflare Challenge | [`cloudflare_challenge_page.py`](examples/cloudflare/cloudflare_challenge_page.py) |
+| GeeTest v3 | [`geetest_v3.py`](examples/geetest/geetest_v3.py) |
+| GeeTest v4 | [`geetest_v4.py`](examples/geetest/geetest_v4.py) |
 | Tencent CAPTCHA | [`tencent.py`](examples/tencent/tencent.py) |
 | Yandex SmartCaptcha | [`yandex_smartcaptcha.py`](examples/yandex/yandex_smartcaptcha.py) |
 | Yandex SmartCaptcha image | [`yandex_smartcaptcha_image.py`](examples/yandex/yandex_smartcaptcha_image.py) |
@@ -88,6 +140,28 @@ are authorized to test. `TARGET_URL` remains available as a generic fallback.
 | Image captcha, digits | [`image_to_text_digits.py`](examples/image/image_to_text_digits.py) |
 | Image captcha, math | [`image_to_text_math.py`](examples/image/image_to_text_math.py) |
 | Coordinates | [`coordinates.py`](examples/coordinates/coordinates.py) |
+
+## GeeTest
+
+Set the two target URLs in `.env` before running the examples:
+
+```dotenv
+GEETEST_V3_TARGET_URL=https://geetest-v3-placeholder.example/demo
+GEETEST_V4_TARGET_URL=https://geetest-v4-placeholder.example/demo
+```
+
+Replace these placeholders with pages you own or are authorized to test.
+
+GeeTest v3 uses a dynamic, single-use `challenge`. The example requests a fresh `gt` and
+`challenge` pair from the target's initialization endpoint before opening its widget. It solves
+the task first, then opens the target page, fills `geetest_challenge`, `geetest_validate`, and
+`geetest_seccode`, submits the form, and checks the page's response. Adapt the initialization
+endpoint when using a different site.
+
+GeeTest v4 does not use the v3 `gt/challenge` pair. The example intercepts `initGeetest4` to
+capture `captchaId`, solves the version 4 task, and returns `captcha_id`, `lot_number`,
+`pass_token`, `gen_time`, and `captcha_output` together through the widget's `getValidate()`.
+It then submits the form and checks the page's verification response.
 
 ## Yandex SmartCaptcha
 
@@ -104,8 +178,8 @@ python examples/yandex/yandex_smartcaptcha_image.py
 python examples/yandex/yandex_smartcaptcha_kaleidoscope.py
 ```
 
-Leave `YANDEX_TARGET_URL` and `TARGET_URL` empty to use
-`https://captcha-api.yandex.ru/demo`.
+The example uses the official demo at `https://smartcaptcha.cloud.yandex.ru/demo` when
+`YANDEX_TARGET_URL` and the optional generic `TARGET_URL` fallback are not set.
 The example reads the widget's `data-sitekey` and the browser's User-Agent,
 requests a token using `YandexSmartCaptchaTaskProxyless`, fills `smart-token`,
 and submits the form. It reports success only after the page returns
@@ -124,16 +198,17 @@ the token delivery to that callback as well.
 
 ## Tencent CAPTCHA
 
-Tencent requires your own target page and selectors:
+Tencent requires a target page that constructs `TencentCaptcha`. Replace the placeholder URL in
+`.env` with a page you are authorized to test:
 
 ```dotenv
-TENCENT_TARGET_URL=https://example.com/page_with_tencent_captcha
-TENCENT_TRIGGER_SELECTOR=#open-captcha
-TENCENT_SUCCESS_SELECTOR=.verification-success
+TENCENT_TARGET_URL=https://tencent-captcha-placeholder.example/demo
 ```
 
-Leave `TENCENT_TRIGGER_SELECTOR` empty if the page opens the captcha
-automatically.
+The example intercepts the constructor and confirms that the ticket and `randstr` were delivered
+to the page callback. Pages that need an explicit trigger or render a success element may
+optionally define `TENCENT_TRIGGER_SELECTOR` or `TENCENT_SUCCESS_SELECTOR`; neither is required
+for a page that opens the CAPTCHA automatically and reports through its callback.
 
 ## Proxy
 
@@ -151,8 +226,8 @@ The browser and API task use the same proxy.
 
 ```bash
 python -m pip install ruff
-ruff check .
-ruff format --check .
+python -m ruff check .
+python -m ruff format --check .
 ```
 
 ## Documentation
