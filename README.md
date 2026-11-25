@@ -225,10 +225,15 @@ The browser and API task use the same proxy.
 ## Quality checks
 
 ```bash
-python -m pip install ruff
+python -m pip install -r requirements-dev.txt
+python -m pytest
 python -m ruff check .
 python -m ruff format --check .
 ```
+
+The pytest suite includes unit tests for shared configuration helpers and browser regression tests
+against local in-memory HTML. It does not visit external CAPTCHA pages, call the solver API, create
+paid tasks, or use the API key from `.env`.
 
 ## Documentation and related projects
 
